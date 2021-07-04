@@ -5,4 +5,4 @@
 __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 
 from setuptools import setup
-setup()
+setup(use_scm_version=True)

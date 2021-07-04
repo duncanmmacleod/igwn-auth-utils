@@ -5,8 +5,6 @@
 __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 __credits__ = "Duncan Brown, Leo Singer"
 __license__ = "BSD-3-Clause"
-__version__ = "0.1.0"
-
 
 from .scitokens import (
     find_token as find_scitoken,
@@ -14,3 +12,8 @@ from .scitokens import (
 from .x509 import (
     find_credentials as find_x509_credentials,
 )
+
+try:  # parse version
+    from ._version import version as __version__
+except ModuleNotFoundError:  # development mode
+    __version__ = ''
