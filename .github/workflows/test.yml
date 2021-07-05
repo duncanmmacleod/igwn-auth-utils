@@ -55,15 +55,8 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install basic build tools
-      run: |
-        python -m pip install --upgrade \
-            pip \
-            wheel \
-        ;
-
     - name: Install this project
-      run: python -m pip install .[test] --no-build-isolation -vv
+      run: python -m pip install .[test] -vv
 
     - name: Package list
       run: python -m pip list installed
