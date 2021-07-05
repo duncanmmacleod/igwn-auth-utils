@@ -13,4 +13,6 @@ write_to = "igwn_auth_utils/_version.py"
 addopts = "-r a --color=yes"
 filterwarnings = [
 	"error",
+	# https://github.com/pyreadline/pyreadline/issues/65
+	"ignore:Using or importing the ABCs::pyreadline",
 ]
