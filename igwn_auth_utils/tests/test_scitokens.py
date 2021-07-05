@@ -273,7 +273,11 @@ def test_find_condor_creds_dir_empty(tmp_path):
     assert not list(igwn_scitokens._find_condor_creds_token_paths())
 
 
-@pytest.mark.xfail(scitokens_version < "1.4.1", reason="bug in scitokens")
+@pytest.mark.xfail(
+    scitokens_version < "1.4.1",
+    reason="bug in scitokens",
+    strict=True,
+)
 def test_token_authorization_header(rtoken):
     """Check that `token_authorization_header` works
     """
