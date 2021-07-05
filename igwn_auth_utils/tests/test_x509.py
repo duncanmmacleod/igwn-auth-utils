@@ -68,7 +68,7 @@ def x509cert_path(x509cert, tmp_path):
 )
 def test_default_cert_path():
     if os.name == "nt":
-        os.environ["SYSTEMROOT"] = r"C:\WINDOWS\Temp"
+        os.environ["SYSTEMROOT"] = r"C:\WINDOWS"
         expected = r"C:\WINDOWS\Temp\x509up_123"
     else:
         expected = r"/tmp/x509up_u123"
@@ -90,7 +90,7 @@ def test_find_credentials_x509userproxy(x509cert_path):
     assert igwn_x509.find_credentials() == (x509cert_filename,) * 2
 
 
-@mock.patch.dict("os.environ")
+@mock.patch.dict("os.environ", clear=True)
 def test_find_credentials_x509usercertkey(x509cert_path, public_pem_path):
     x509cert_filename = str(x509cert_path)
     x509key_filename = str(public_pem_path)

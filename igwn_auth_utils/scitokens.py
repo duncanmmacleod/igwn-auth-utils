@@ -15,6 +15,8 @@ from scitokens import (
     SciToken,
 )
 
+WINDOWS = os.name == "nt"
+
 # -- utilities --------------
 
 
@@ -189,7 +191,15 @@ def _find_tokens(**deserialize_kwargs):
 
     try:
         yield _token_or_exception(SciToken.discover, **deserialize_kwargs)
-    except OSError:  # no token
+    except (
+        OSError,  # no token
+        AttributeError, # windows doesn't have geteuid
+    ) as exc:
+        if isinstance(exc, AttributeError) and not (
+            WINDOWS
+            and "geteuid" in str(exc)
+        ):
+            raise
         for tokenfile in _find_condor_creds_token_paths():
             yield _token_or_exception(
                 load_token_file,
