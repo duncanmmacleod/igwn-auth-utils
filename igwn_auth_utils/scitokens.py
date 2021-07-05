@@ -193,7 +193,7 @@ def _find_tokens(**deserialize_kwargs):
         yield _token_or_exception(SciToken.discover, **deserialize_kwargs)
     except (
         OSError,  # no token
-        AttributeError, # windows doesn't have geteuid
+        AttributeError,  # windows doesn't have geteuid
     ) as exc:
         if isinstance(exc, AttributeError) and not (
             WINDOWS
