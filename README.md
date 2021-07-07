@@ -14,7 +14,7 @@ SciTokens for use with HTTP(S) requests to IGWN-operated services.
 ## Installation
 
 The best way to install the latest release is using
-[`conda`](https://conda.org/) with the
+[`conda`](https://conda.io/) with the
 [`conda-forge`](https://conda-forge.org) channel enabled:
 
 ```bash
