@@ -137,7 +137,7 @@ def test_load_token_file(rtoken_path, rtoken, public_pem):
     )
 
 
-@mock.patch.dict("os.environ", clear=True)
+@mock.patch.dict("os.environ")
 @pytest.mark.parametrize("envname", (
     "SCITOKEN",
     "BEARER_TOKEN",
@@ -155,7 +155,7 @@ def test_find_token_env_scitoken(rtoken, public_pem, envname):
     )
 
 
-@mock.patch.dict("os.environ", clear=True)
+@mock.patch.dict("os.environ")
 @pytest.mark.parametrize("envname", (
     "SCITOKEN_FILE",
     "BEARER_TOKEN_FILE",
@@ -183,7 +183,7 @@ def test_find_token_env_scitoken_file(
     )
 
 
-@mock.patch.dict("os.environ", clear=True)
+@mock.patch.dict("os.environ")
 def test_find_token_condor_creds(
     rtoken,
     wtoken,
@@ -206,7 +206,7 @@ def test_find_token_condor_creds(
         )
 
 
-@mock.patch.dict("os.environ", clear=True)
+@mock.patch.dict("os.environ")
 def test_find_token_error(rtoken, public_pem):
     # token with the wrong claims
     os.environ["SCITOKEN"] = rtoken.serialize().decode("utf-8")
@@ -223,7 +223,7 @@ def test_find_token_error(rtoken, public_pem):
     )
 
 
-@mock.patch.dict("os.environ", clear=True)
+@mock.patch.dict("os.environ")
 @pytest.mark.parametrize(("skip_errors", "error_type", "message"), (
     (False, NonHTTPSIssuer, "Issuer is not over HTTPS"),
     (True, RuntimeError, "could not find a valid SciToken"),
@@ -247,7 +247,7 @@ def test_find_token_skip_errors(rtoken, skip_errors, error_type, message):
     assert str(exc.value).startswith(message)
 
 
-@mock.patch.dict("os.environ", clear=True)
+@mock.patch.dict("os.environ")
 def test_find_condor_creds_no_env(tmp_path):
     """Check that `_find_condor_creds_token_paths()` handles missing
     ``_CONDOR_CREDS`` environment variable
@@ -255,7 +255,7 @@ def test_find_condor_creds_no_env(tmp_path):
     assert not list(igwn_scitokens._find_condor_creds_token_paths())
 
 
-@mock.patch.dict("os.environ", clear=True)
+@mock.patch.dict("os.environ")
 def test_find_condor_creds_dir_missing(tmp_path):
     """Check that `_find_condor_creds_token_paths()` handles
     ``_CONDOR_CREDS`` pointing at a directory that doesn't exist
@@ -264,7 +264,7 @@ def test_find_condor_creds_dir_missing(tmp_path):
     assert not list(igwn_scitokens._find_condor_creds_token_paths())
 
 
-@mock.patch.dict("os.environ", clear=True)
+@mock.patch.dict("os.environ")
 def test_find_condor_creds_dir_empty(tmp_path):
     """Check that `_find_condor_creds_token_paths()` handles
     ``_CONDOR_CREDS`` pointing at an empty directory
