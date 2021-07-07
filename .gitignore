@@ -23,6 +23,7 @@ var/
 MANIFEST
 Portfile
 .eggs/
+/igwn_auth_utils/_version.py
 
 # Installer logs
 pip-log.txt
@@ -30,6 +31,7 @@ pip-delete-this-directory.txt
 
 # Sphinx documentation
 /docs/_build
+/docs/api/
 
 # OS/editor files
 *.swp
