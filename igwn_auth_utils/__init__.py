@@ -8,6 +8,7 @@ __license__ = "BSD-3-Clause"
 
 from .scitokens import (
     find_token as find_scitoken,
+    token_authorization_header as scitoken_authorization_header,
 )
 from .x509 import (
     find_credentials as find_x509_credentials,
