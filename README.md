@@ -5,6 +5,12 @@ Python library functions to simplify using IGWN authorisation credentials.
 This project is primarily aimed at discovering X.509 credentials and
 SciTokens for use with HTTP(S) requests to IGWN-operated services.
 
+## Development status
+
+[![Build status](https://github.com/duncanmmacleod/igwn-auth-utils/actions/workflows/test.yml/badge.svg)](https://github.com/duncanmmacleod/igwn-auth-utils/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/duncanmmacleod/igwn-auth-utils/branch/main/graph/badge.svg?token=kBk2fNinuS)](https://codecov.io/gh/duncanmmacleod/igwn-auth-utils)
+[![Maintainability](https://api.codeclimate.com/v1/badges/8f6c07f0fc8c33015aef/maintainability)](https://codeclimate.com/github/duncanmmacleod/igwn-auth-utils/maintainability)
+
 ## Installation
 
 The best way to install the latest release is using
