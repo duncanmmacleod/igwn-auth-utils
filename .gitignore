@@ -25,6 +25,16 @@ Portfile
 .eggs/
 /igwn_auth_utils/_version.py
 
+# Debian packaging files
+/debian/.debhelper/
+/debian/*.debhelper.log
+/debian/*.postinst.debhelper
+/debian/*.prerm.debhelper
+/debian/*.substvars
+/debian/*gwosc/
+/debian/files
+/.pybuild/
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
