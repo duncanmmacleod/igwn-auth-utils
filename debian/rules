@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpkg/pkg-info.mk
+
+export PYBUILD_NAME = igwn-auth-utils
+
+# python3-jwt is too old for python3-scitokens, so we can't test anything
+export PYBUILD_DISABLE = test
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild

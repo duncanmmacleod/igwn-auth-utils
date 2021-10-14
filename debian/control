@@ -1,0 +1,33 @@
+# -- gwosc source package ------------------------------------------------------
+
+Source: igwn-auth-utils
+Homepage: https://igwn-auth-utils.readthedocs.io
+Vcs-Browser: https://github.com/duncanmmacleod/igwn-auth-utils
+Vcs-Git: https://github.com/duncanmmacleod/igwn-auth-utils.git
+Maintainer: Duncan Macleod <duncan.macleod@ligo.org>
+Section: python
+Priority: optional
+Standards-Version: 4.6.0
+X-Python3-Version: >= 3.6
+Build-Depends:
+ debhelper (>= 12),
+ dh-python,
+ lsb-release,
+ python3-all,
+ python3-setuptools (>= 38.2.5),
+ python3-setuptools-scm,
+ python3-wheel,
+
+# -- python3-igwn-auth-utils ---------------------------------------------------
+
+Package: python3-igwn-auth-utils
+Architecture: all
+Depends:
+ ${misc:Depends},
+ ${python3:Depends},
+ python3-cryptography,
+ python3-scitokens,
+Description: Authorisation utilities for IGWN
+ Python library functions to simplify using IGWN authorisation credentials.
+ This project is primarily aimed at discovering X.509 credentials and
+ SciTokens for use with HTTP(S) requests to IGWN-operated services.
