@@ -57,6 +57,7 @@ jobs:
       matrix:
         debian:
           - buster
+          - bullseye
     runs-on: ubuntu-latest
     container: igwn/base:${{ matrix.debian }}
     env:
@@ -120,6 +121,7 @@ jobs:
       matrix:
         debian:
           - buster
+          - bullseye
     runs-on: ubuntu-latest
     container: igwn/base:${{ matrix.debian }}
     env:
@@ -185,6 +187,7 @@ jobs:
       matrix:
         debian:
           - buster
+          - bullseye
     runs-on: ubuntu-latest
     container: igwn/base:${{ matrix.debian }}
     steps:
