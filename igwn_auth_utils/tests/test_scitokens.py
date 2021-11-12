@@ -13,10 +13,6 @@ from unittest import mock
 
 from scitokens import SciToken
 from scitokens.utils.errors import NonHTTPSIssuer
-try:
-    from scitokens import __version__ as scitokens_version
-except ImportError:
-    scitokens_version = "0.0.0"
 
 import pytest
 
@@ -273,11 +269,6 @@ def test_find_condor_creds_dir_empty(tmp_path):
     assert not list(igwn_scitokens._find_condor_creds_token_paths())
 
 
-@pytest.mark.xfail(
-    scitokens_version < "1.4.1",
-    reason="bug in scitokens",
-    strict=True,
-)
 def test_token_authorization_header(rtoken):
     """Check that `token_authorization_header` works
     """

@@ -30,7 +30,7 @@ BuildRequires: python%{python3_pkgversion}-wheel
 # test dependencies
 BuildRequires: python%{python3_pkgversion}-cryptography
 BuildRequires: python%{python3_pkgversion}-pip
-BuildRequires: python3-scitokens
+BuildRequires: python%{python3_pkgversion}-scitokens >= 1.5.0
 
 %description
 Python library functions to simplify using IGWN authorisation credentials.
@@ -41,7 +41,7 @@ SciTokens for use with HTTP(S) requests to IGWN-operated services.
 
 %package -n python%{python3_pkgversion}-%{name}
 Requires: python%{python3_pkgversion}-cryptography
-Requires: python3-scitokens
+Requires: python%{python3_pkgversion}-scitokens >= 1.5.0
 Summary:  %{summary}
 %{?python_provide:%python_provide python%{python3_pkgversion}-%{name}}
 %description -n python%{python3_pkgversion}-%{name}

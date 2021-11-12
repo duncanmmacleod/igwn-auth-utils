@@ -158,18 +158,7 @@ def _find_tokens(**deserialize_kwargs):
     attempting to parse a token that was actually found, so that
     they can be handled by the caller.
     """
-    try:
-        from scitokens.utils.errors import SciTokensException
-    except ImportError:  # scitokens < 1.4.1
-        from scitokens.utils import errors as _scitokens_errors
-        SciTokensException = (
-            _scitokens_errors.InvalidTokenFormat,
-            _scitokens_errors.MissingIssuerException,
-            _scitokens_errors.MissingKeyException,
-            _scitokens_errors.NonHTTPSIssuer,
-            _scitokens_errors.UnableToCreateCache,
-            _scitokens_errors.UnsupportedKeyException,
-        )
+    from scitokens.utils.errors import SciTokensException
 
     def _token_or_exception(func, *args, **kwargs):
         try:
