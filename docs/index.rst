@@ -25,10 +25,20 @@ Documentation
 -------------
 
 .. automodapi:: igwn_auth_utils
-   :no-heading:
    :no-main-docstr:
    :no-inheritance-diagram:
-   :headings: -^
+   :headings: ^"
+
+.. automodapi:: igwn_auth_utils.requests
+   :no-main-docstr:
+   :no-inheritance-diagram:
+   :headings: ^"
+   :skip: netrc
+   :skip: urlparse
+   :skip: IgwnAuthError
+   :skip: find_scitoken
+   :skip: find_x509_credentials
+   :skip: scitoken_authorization_header
 
 -------
 Support

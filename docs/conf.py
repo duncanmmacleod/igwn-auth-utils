@@ -56,11 +56,17 @@ html_theme_options = {
     "master_doc": False,
     "nav_links": [],
 }
+html_static_path = ["_static"]
 
 # -- extensions -------------
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/", None),
+    "requests": ("https://docs.python-requests.org/en/stable/", None),
+    "requests-gracedb": (
+        "https://requests-gracedb.readthedocs.io/en/stable/",
+        None,
+    ),
 }
 
 automodapi_inherited_members = False
@@ -113,3 +119,9 @@ def linkcode_resolve(domain, info):
         top_module.__name__,
         fileref,
     )
+
+
+# -- setup ------------------
+
+def setup(app):
+    app.add_css_file("css/igwnauthutils.css")
