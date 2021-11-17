@@ -85,17 +85,27 @@ def test_is_valid_cert_path_false(tmp_path):
 
 @mock.patch.dict("os.environ")
 def test_find_credentials_x509userproxy(x509cert_path):
+    """Test that `find_credentials()` returns the X509_USER_PROXY if set
+    """
     x509cert_filename = str(x509cert_path)
     os.environ["X509_USER_PROXY"] = x509cert_filename
-    assert igwn_x509.find_credentials() == (x509cert_filename,) * 2
+    assert igwn_x509.find_credentials() == x509cert_filename
 
 
-@mock.patch.dict("os.environ", clear=True)
+@mock.patch.dict("os.environ")
 def test_find_credentials_x509usercertkey(x509cert_path, public_pem_path):
+    """Test that `find_credentials()` returns the X509_USER_{CERT,KEY} pair
+
+    ... if X509_USER_PROXY is not set
+    """
+    # configure the environment to return (cert, key)
+    os.environ.pop("X509_USER_PROXY", None)
     x509cert_filename = str(x509cert_path)
     x509key_filename = str(public_pem_path)
     os.environ["X509_USER_CERT"] = x509cert_filename
     os.environ["X509_USER_KEY"] = x509key_filename
+
+    # check that find_credentials() returns the (cert, key) pair
     assert igwn_x509.find_credentials() == (
         x509cert_filename,
         x509key_filename,
@@ -103,18 +113,48 @@ def test_find_credentials_x509usercertkey(x509cert_path, public_pem_path):
 
 
 @mock.patch.dict("os.environ", clear=True)
-def test_find_credentials_default(x509cert_path):
-    with mock.patch("igwn_auth_utils.x509._default_cert_path") as m:
-        m.return_value = x509cert_path
-        assert igwn_x509.find_credentials() == (str(x509cert_path),) * 2
+@mock.patch("igwn_auth_utils.x509._default_cert_path")
+def test_find_credentials_default(_default_cert_path, x509cert_path):
+    """Test that `find_credentials()` returns the default path
+
+    ... if none of the X509_USER variable are set
+    """
+    _default_cert_path.return_value = x509cert_path
+    assert igwn_x509.find_credentials() == str(x509cert_path)
 
 
-@mock.patch.dict("os.environ", clear=True)
-def test_find_credentials_error(tmp_path):
-    with mock.patch("igwn_auth_utils.x509._default_cert_path") as m:
-        m.return_value = tmp_path / "does-not-exist"
-        with pytest.raises(RuntimeError) as exc:
-            igwn_x509.find_credentials()
-        assert str(exc.value).startswith(
-            "could not find an RFC-3820 compliant X.509 credential",
-        )
+@mock.patch.dict(
+    "os.environ",
+)
+@mock.patch(
+    "igwn_auth_utils.x509.is_valid_cert_path",
+    side_effect=(
+        False,  # fail for _default_cert_path
+        True,  # so that ~/.globus/usercert.pem passes
+    ),
+)
+@mock.patch("os.access", return_value=True)
+def test_find_credentials_globus(_, x509cert_path):
+    """Test that .globus files are returned if all else fails
+    """
+    # clear X509 variables out of the environment
+    for suffix in ("PROXY", "CERT", "KEY"):
+        os.environ.pop(f"X509_USER_{suffix}", None)
+
+    # check that .globus is found
+    globusdir = Path.home() / ".globus"
+    assert igwn_x509.find_credentials() == (
+        str(globusdir / "usercert.pem"),
+        str(globusdir / "userkey.pem"),
+    )
+
+
+@mock.patch("os.access", return_value=False)  # force all discovery to fail
+def test_find_credentials_error(_, tmp_path):
+    """Test that a failure in discovering X.509 creds raises the right error
+    """
+    with pytest.raises(RuntimeError) as exc:
+        print(igwn_x509.find_credentials())
+    assert str(exc.value).startswith(
+        "could not find an RFC-3820 compliant X.509 credential",
+    )

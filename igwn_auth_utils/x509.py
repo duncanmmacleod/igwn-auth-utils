@@ -54,13 +54,22 @@ def _timeleft(cert):
 
 
 def find_credentials(timeleft=600):
-    """Locate X509 certificate and key files.
+    """Locate X509 certificate and (optionally) private key files.
 
     This function checks the following paths in order:
 
     - ``${X509_USER_PROXY}``
     - ``${X509_USER_CERT}`` and ``${X509_USER_KEY}``
     - ``/tmp/x509up_u${UID}``
+    - ``~/.globus/usercert.pem`` and ``~/.globus/userkey.pem``
+
+    Note
+    ----
+    If the ``X509_USER_{PROXY,CERT,KEY}`` variables are set, their paths
+    **are not** validated in any way, but are trusted to point at valid,
+    non-expired credentials.
+    The default paths in `/tmp` and `~/.globus` **are** validated before
+    being returned.
 
     Parameters
     ----------
@@ -71,31 +80,62 @@ def find_credentials(timeleft=600):
     Returns
     -------
     cert : `str`
-        the path of the certificate file
+        the path of the certificate file that also contains the
+        private key, **OR**
 
-    key : `str`
-        the path of the key file (this may be the same as ``cert``)
+    cert, key : `str`
+        the paths of the separate cert and private key files
 
     Raises
     ------
     RuntimeError
         if not certificate files can be found, or if the files found on
         disk cannot be validtted.
-    """
-    try:  # use X509_USER_PROXY from environment if set
-        cert = key = os.environ['X509_USER_PROXY']
-    except KeyError:
-        try:  # otherwise use _CERT and _KEY from env
-            cert = os.environ['X509_USER_CERT']
-            key = os.environ['X509_USER_KEY']
-        except KeyError:  # otherwise fall back to default path
-            cert = key = _default_cert_path("x509up_")
 
-    if (
-        is_valid_cert_path(cert, timeleft)  # validate the cert properly
-        and os.access(key, os.R_OK)  # sanity check the key
-    ):
-        return str(cert), str(key)
+    Examples
+    --------
+    If no environment variables are set, but a short-lived certificate has
+    been generated in the default location:
+
+    >>> find_credentials()
+    '/tmp/x509up_u1000'
+
+    If a long-lived (grid) certificate has been downloaded:
+
+    >>> find_credentials()
+    ('/home/me/.globus/usercert.pem', '/home/me/.globus/userkey.pem')
+    """
+    # -- check the environment variables (without validation)
+
+    try:
+        return os.environ['X509_USER_PROXY']
+    except KeyError:
+        try:
+            return os.environ['X509_USER_CERT'], os.environ['X509_USER_KEY']
+        except KeyError:
+            pass
+
+    # -- look up some default paths (with validation)
+
+    # 1: /tmp/x509up_u<uid> (cert = key)
+    default = str(_default_cert_path())
+    if is_valid_cert_path(default, timeleft):
+        return default
+
+    # 2: ~/.globus/user{cert,key}.pem
+    try:
+        globusdir = Path.home() / ".globus"
+    except RuntimeError:  # pragma: no cover
+        # no 'home'
+        pass
+    else:
+        cert = str(globusdir / "usercert.pem")
+        key = str(globusdir / "userkey.pem")
+        if (
+            is_valid_cert_path(cert, timeleft)  # validate the cert
+            and os.access(key, os.R_OK)  # sanity check the key
+        ):
+            return cert, key
 
     raise RuntimeError(
         "could not find an RFC-3820 compliant X.509 credential, "
