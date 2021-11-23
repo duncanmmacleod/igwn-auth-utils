@@ -75,12 +75,28 @@ def test_default_cert_path():
     assert igwn_x509._default_cert_path() == Path(expected)
 
 
-def test_is_valid_cert_path(x509cert_path):
-    assert igwn_x509.is_valid_cert_path(x509cert_path)
+def test_validate_certificate(x509cert):
+    igwn_x509.validate_certificate(x509cert)
 
 
-def test_is_valid_cert_path_false(tmp_path):
-    assert not igwn_x509.is_valid_cert_path(tmp_path / "does-not-exist")
+def test_validate_certificate_path(x509cert_path):
+    igwn_x509.validate_certificate(x509cert_path)
+
+
+def test_validate_certificate_expiry_error(x509cert):
+    with pytest.raises(ValueError) as exc:
+        igwn_x509.validate_certificate(x509cert, timeleft=int(1e10))
+    assert str(exc.value) == (
+        "X.509 certificate has less than 10000000000 seconds remaining"
+    )
+
+
+def test_is_valid_certificate(x509cert_path):
+    assert igwn_x509.is_valid_certificate(x509cert_path)
+
+
+def test_is_valid_certificate_false(tmp_path):
+    assert not igwn_x509.is_valid_certificate(tmp_path / "does-not-exist")
 
 
 @mock.patch.dict("os.environ")
@@ -127,7 +143,7 @@ def test_find_credentials_default(_default_cert_path, x509cert_path):
     "os.environ",
 )
 @mock.patch(
-    "igwn_auth_utils.x509.is_valid_cert_path",
+    "igwn_auth_utils.x509.is_valid_certificate",
     side_effect=(
         False,  # fail for _default_cert_path
         True,  # so that ~/.globus/usercert.pem passes
@@ -149,12 +165,18 @@ def test_find_credentials_globus(_, x509cert_path):
     )
 
 
-@mock.patch("os.access", return_value=False)  # force all discovery to fail
-def test_find_credentials_error(_, tmp_path):
+@mock.patch.dict("os.environ")
+@mock.patch("igwn_auth_utils.x509.is_valid_certificate", return_value=False)
+def test_find_credentials_error(_):
     """Test that a failure in discovering X.509 creds raises the right error
     """
+    # clear X509 variables out of the environment
+    for suffix in ("PROXY", "CERT", "KEY"):
+        os.environ.pop(f"X509_USER_{suffix}", None)
+
+    # check that we can't find any credentials
     with pytest.raises(RuntimeError) as exc:
-        print(igwn_x509.find_credentials())
+        igwn_x509.find_credentials()
     assert str(exc.value).startswith(
         "could not find an RFC-3820 compliant X.509 credential",
     )
