@@ -6,6 +6,7 @@ __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 __credits__ = "Duncan Brown, Leo Singer"
 __license__ = "BSD-3-Clause"
 
+from .error import IgwnAuthError
 from .scitokens import (
     find_token as find_scitoken,
     token_authorization_header as scitoken_authorization_header,

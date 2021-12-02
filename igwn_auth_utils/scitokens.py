@@ -10,6 +10,7 @@ __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 import os
 from pathlib import Path
 
+from .error import IgwnAuthError
 from scitokens import (
     Enforcer,
     SciToken,
@@ -123,7 +124,7 @@ def find_token(audience, scope, timeleft=600, skip_errors=False, **kwargs):
 
     Raises
     ------
-    RuntimeError
+    ~igwn_auth_utils.IgwnAuthError
         if no valid token can be found
 
     See also
@@ -144,7 +145,7 @@ def find_token(audience, scope, timeleft=600, skip_errors=False, **kwargs):
             return token
 
     # if we didn't find any valid tokens:
-    raise RuntimeError(
+    raise IgwnAuthError(
         "could not find a valid SciToken, "
         "please verify the audience and scope, "
         "or generate a new token and try again",

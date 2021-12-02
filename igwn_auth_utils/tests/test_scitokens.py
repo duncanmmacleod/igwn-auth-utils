@@ -17,6 +17,7 @@ from scitokens.utils.errors import NonHTTPSIssuer
 import pytest
 
 from .. import scitokens as igwn_scitokens
+from ..error import IgwnAuthError
 
 ISSUER = "local"
 AUDIENCE = "igwn_auth_utils"
@@ -207,7 +208,7 @@ def test_find_token_error(rtoken, public_pem):
     # token with the wrong claims
     os.environ["SCITOKEN"] = rtoken.serialize().decode("utf-8")
     # check that we get an error
-    with pytest.raises(RuntimeError) as exc:
+    with pytest.raises(IgwnAuthError) as exc:
         igwn_scitokens.find_token(
             AUDIENCE,
             WRITE_SCOPE,
@@ -222,7 +223,7 @@ def test_find_token_error(rtoken, public_pem):
 @mock.patch.dict("os.environ")
 @pytest.mark.parametrize(("skip_errors", "error_type", "message"), (
     (False, NonHTTPSIssuer, "Issuer is not over HTTPS"),
-    (True, RuntimeError, "could not find a valid SciToken"),
+    (True, IgwnAuthError, "could not find a valid SciToken"),
 ))
 def test_find_token_skip_errors(rtoken, skip_errors, error_type, message):
     """Check that the ``skip_errors`` keyword for `find_token()` works
