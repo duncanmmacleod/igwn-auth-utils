@@ -100,22 +100,11 @@ def test_is_valid_certificate_false(tmp_path):
 
 
 @mock.patch.dict("os.environ")
-def test_find_credentials_x509userproxy(x509cert_path):
-    """Test that `find_credentials()` returns the X509_USER_PROXY if set
-    """
-    x509cert_filename = str(x509cert_path)
-    os.environ["X509_USER_PROXY"] = x509cert_filename
-    assert igwn_x509.find_credentials() == x509cert_filename
-
-
-@mock.patch.dict("os.environ")
 def test_find_credentials_x509usercertkey(x509cert_path, public_pem_path):
     """Test that `find_credentials()` returns the X509_USER_{CERT,KEY} pair
-
-    ... if X509_USER_PROXY is not set
     """
+    os.environ.pop("X509_USER_PROXY", "test")  # make sure this doesn't win
     # configure the environment to return (cert, key)
-    os.environ.pop("X509_USER_PROXY", None)
     x509cert_filename = str(x509cert_path)
     x509key_filename = str(public_pem_path)
     os.environ["X509_USER_CERT"] = x509cert_filename
@@ -126,6 +115,22 @@ def test_find_credentials_x509usercertkey(x509cert_path, public_pem_path):
         x509cert_filename,
         x509key_filename,
     )
+
+
+@mock.patch.dict("os.environ")
+def test_find_credentials_x509userproxy(x509cert_path):
+    """Test that `find_credentials()` returns the X509_USER_PROXY if set
+
+    ... if X509_USER_{CERT,KEY} are not set
+    """
+    # remove CERT,KEY so that PROXY can win
+    os.environ.pop("X509_USER_CERT", None)
+    os.environ.pop("X509_USER_KEY", None)
+    # set the PROXY variable
+    x509cert_filename = str(x509cert_path)
+    os.environ["X509_USER_PROXY"] = x509cert_filename
+    # make sure it gets found
+    assert igwn_x509.find_credentials() == x509cert_filename
 
 
 @mock.patch.dict("os.environ", clear=True)

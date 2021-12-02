@@ -125,14 +125,14 @@ def find_credentials(timeleft=600):
 
     This function checks the following paths in order:
 
-    - ``${X509_USER_PROXY}``
     - ``${X509_USER_CERT}`` and ``${X509_USER_KEY}``
+    - ``${X509_USER_PROXY}``
     - ``/tmp/x509up_u${UID}``
     - ``~/.globus/usercert.pem`` and ``~/.globus/userkey.pem``
 
     Note
     ----
-    If the ``X509_USER_{PROXY,CERT,KEY}`` variables are set, their paths
+    If the ``X509_USER_{CERT,KEY,PROXY}`` variables are set, their paths
     **are not** validated in any way, but are trusted to point at valid,
     non-expired credentials.
     The default paths in `/tmp` and `~/.globus` **are** validated before
@@ -175,10 +175,10 @@ def find_credentials(timeleft=600):
     # -- check the environment variables (without validation)
 
     try:
-        return os.environ['X509_USER_PROXY']
+        return os.environ['X509_USER_CERT'], os.environ['X509_USER_KEY']
     except KeyError:
         try:
-            return os.environ['X509_USER_CERT'], os.environ['X509_USER_KEY']
+            return os.environ['X509_USER_PROXY']
         except KeyError:
             pass
 
