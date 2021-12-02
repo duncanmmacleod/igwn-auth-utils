@@ -12,6 +12,8 @@ from cryptography.x509 import (
 )
 from cryptography.hazmat.backends import default_backend
 
+from .error import IgwnAuthError
+
 
 def load_x509_certificate_file(file, backend=None):
     """Load a PEM-format X.509 certificate from a file, or file path
@@ -155,7 +157,7 @@ def find_credentials(timeleft=600):
 
     Raises
     ------
-    RuntimeError
+    ~igwn_auth_utils.IgwnAuthError
         if not certificate files can be found, or if the files found on
         disk cannot be validtted.
 
@@ -204,7 +206,7 @@ def find_credentials(timeleft=600):
         ):
             return cert, key
 
-    raise RuntimeError(
+    raise IgwnAuthError(
         "could not find an RFC-3820 compliant X.509 credential, "
         "please generate one and try again.",
     )

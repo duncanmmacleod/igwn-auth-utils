@@ -25,6 +25,7 @@ from cryptography.hazmat.primitives import (
 import pytest
 
 from .. import x509 as igwn_x509
+from ..error import IgwnAuthError
 
 
 # -- fixtures ---------------
@@ -175,7 +176,7 @@ def test_find_credentials_error(_):
         os.environ.pop(f"X509_USER_{suffix}", None)
 
     # check that we can't find any credentials
-    with pytest.raises(RuntimeError) as exc:
+    with pytest.raises(IgwnAuthError) as exc:
         igwn_x509.find_credentials()
     assert str(exc.value).startswith(
         "could not find an RFC-3820 compliant X.509 credential",
