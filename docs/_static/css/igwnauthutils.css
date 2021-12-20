@@ -1,0 +1,30 @@
+/* style sheet for IGWN Auth Utils docs */
+/* Copyright (C) 2021 Cardff University */
+
+/* -- autoclass formatting ------------------------------------------------ */
+
+/* class title */
+dl.class > dt > span,
+dl.function > dt > span {
+		font-size: 120%;
+}
+dl.class > dt > span.descclassname {
+		padding-right: 0;
+}
+dl.class > dt > span.descname {
+		padding-left: 0;
+}
+dl > dt > em > span.n,
+dl > dt > em > span.default_value {
+		font-family: "Roboto mono", "Courier New", Courier, monospace;
+		font-style: normal;
+}
+
+dl.class > dd,
+dl.function > dd {
+		margin-left: 0;
+}
+
+dl.field-list > dt {
+		padding-left: 0;
+}
