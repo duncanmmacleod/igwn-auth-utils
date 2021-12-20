@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   test:
-    name: ${{ matrix.name || format('Python {0} ({1})', matrix.python-version, matrix.os) }}
+    name: Python ${{ matrix.python-version }} (${{ matrix.os }})
 
     strategy:
       fail-fast: false
@@ -38,10 +38,11 @@ jobs:
           - Ubuntu
           - Windows
         python-version:
-          - 3.6
-          - 3.7
-          - 3.8
-          - 3.9
+          - "3.6"
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
     runs-on: ${{ matrix.os }}-latest
 
     steps:
