@@ -1,5 +1,5 @@
 %define name    igwn-auth-utils
-%define version 0.1.0
+%define version 0.2.0
 %define release 1
 
 Name:      %{name}
@@ -76,5 +76,8 @@ rm -rf $RPM_BUILD_ROOT
 # -- changelog
 
 %changelog
+* Mon Dec 20 2021 Duncan Macleod <duncan.macleod@ligo.org> - 0.2.0-1
+- update to 0.2.0
+
 * Thu Oct 7 2021 Duncan Macleod <duncan.macleod@ligo.org> - 0.1.0-1
 - initial release
