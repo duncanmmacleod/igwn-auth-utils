@@ -1,6 +1,6 @@
 %define name    igwn-auth-utils
 %define version 0.2.0
-%define release 1
+%define release 2
 
 Name:      %{name}
 Version:   %{version}
@@ -26,11 +26,6 @@ BuildRequires: python3-rpm-macros
 BuildRequires: python%{python3_pkgversion}-setuptools >= 38.2.5
 BuildRequires: python%{python3_pkgversion}-setuptools_scm
 BuildRequires: python%{python3_pkgversion}-wheel
-
-# test dependencies
-BuildRequires: python%{python3_pkgversion}-cryptography
-BuildRequires: python%{python3_pkgversion}-pip
-BuildRequires: python%{python3_pkgversion}-scitokens >= 1.5.0
 
 %description
 Python library functions to simplify using IGWN authorisation credentials.
@@ -80,6 +75,9 @@ rm -rf $RPM_BUILD_ROOT
 # -- changelog
 
 %changelog
+* Tue Dec 21 2021 Duncan Macleod <duncan.macleod@ligo.org> - 0.2.0-2
+- remove unused buildrequires
+
 * Mon Dec 20 2021 Duncan Macleod <duncan.macleod@ligo.org> - 0.2.0-1
 - update to 0.2.0
 
