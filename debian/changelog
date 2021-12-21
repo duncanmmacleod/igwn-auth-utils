@@ -1,3 +1,9 @@
+igwn-auth-utils (0.2.0-2) unstable; urgency=low
+
+  * fix safe-netrc recommendation
+
+ -- Duncan Macleod <duncan.macleod@ligo.org>  Tue, 21 Dec 2021 07:24:00 +0000
+
 igwn-auth-utils (0.2.0-1) unstable; urgency=low
 
   * update to 0.2.0
