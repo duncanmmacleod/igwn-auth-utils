@@ -24,13 +24,24 @@ WINDOWS = os.name == "nt"
 def is_valid_token(token, audience, scope, timeleft=600):
     enforcer = Enforcer(token["iss"], audience=audience)
 
+    # add validator for timeleft
     def _validate_timeleft(value):
         exp = float(value)
         return exp >= enforcer._now + timeleft
 
     enforcer.add_validator("exp", _validate_timeleft)
-    scheme, path = scope.split(":", 1)
-    return enforcer.test(token, scheme, path)
+
+    # parse scope as scheme:path
+    authz = None
+    path = None
+    if scope is not None:
+        try:
+            authz, path = scope.split(":", 1)
+        except ValueError:
+            authz = scope
+
+    # test
+    return enforcer.test(token, authz, path=path)
 
 
 # -- I/O --------------------
