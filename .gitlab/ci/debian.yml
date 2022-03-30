@@ -32,6 +32,24 @@ include:
     - tarball
   variables:
     TARBALL: "igwn-auth-utils-*.tar.*"
+  before_script:
+    - !reference [".debian:dsc", "before_script"]
+    - apt-get -yqq install devscripts dpkg-dev
+    # -- hack the tarball so that setuptools-scm version matches
+    #    the debian changelog
+    - tar -zxf ${TARBALL}
+    # get versions from the Python metadata and the Debian changelog
+    - PKG_VERSION=$(grep ^Version igwn-auth-utils-*/PKG-INFO | cut -d\  -f2)
+    - CHANGELOG_VERSION=$(dpkg-parsechangelog -l igwn-auth-utils-*/debian/changelog --show-field Version)
+    # and compare them:
+    - USE_PKG_VERSION=$(python3 -c "print(str('${PKG_VERSION}' > '${CHANGELOG_VERSION}').lower())")
+    # if the package version is newer than the changelog version
+    # (standard dev update), we need to add a changelog entry
+    - if ${USE_PKG_VERSION}; then
+          (cd igwn-auth-utils-*/; dch --newversion ${PKG_VERSION}-9999 --controlmaint "ci build");
+      fi
+    # repack the tarball
+    - tar -zcf ${TARBALL} */
 
 dsc:buster:
   extends:

@@ -21,7 +21,7 @@ docs:
     # https://computing.docs.ligo.org/gitlab-ci-templates/python/#.python:sphinx
     - .python:sphinx
   before_script:
-    - python -m pip install .[docs]
+    - python -m pip install .[docs,requests]
 
 #
 # Publishing is done automatically
