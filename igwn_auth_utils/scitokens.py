@@ -10,11 +10,20 @@ __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 import os
 from pathlib import Path
 
-from .error import IgwnAuthError
+from jwt import InvalidTokenError
 from scitokens import (
     Enforcer,
     SciToken,
 )
+from scitokens.utils.errors import SciTokensException
+
+from .error import IgwnAuthError
+
+TOKEN_ERROR = (
+    InvalidTokenError,
+    SciTokensException,
+)
+
 
 WINDOWS = os.name == "nt"
 
@@ -143,13 +152,17 @@ def find_token(audience, scope, timeleft=600, skip_errors=False, **kwargs):
     scitokens.SciToken.deserialize
         for details of the deserialisation, and any valid keyword arguments
     """
+    # preserve error from parsing tokens
+    error = None
+
     # iterate over all of the tokens we can find for this audience
     for token in _find_tokens(audience=audience, **kwargs):
         # parsing a token yielded an exception, handle it here:
         if isinstance(token, Exception):
+            error = error or token  # record (first) error for later
             if skip_errors:
-                continue
-            raise token
+                continue  # move on
+            raise IgwnAuthError(str(error)) from error  # stop here and raise
 
         # if this token is valid, stop here and return it
         if is_valid_token(token, audience, scope, timeleft):
@@ -160,7 +173,7 @@ def find_token(audience, scope, timeleft=600, skip_errors=False, **kwargs):
         "could not find a valid SciToken, "
         "please verify the audience and scope, "
         "or generate a new token and try again",
-    )
+    ) from error
 
 
 def _find_tokens(**deserialize_kwargs):
@@ -170,12 +183,10 @@ def _find_tokens(**deserialize_kwargs):
     attempting to parse a token that was actually found, so that
     they can be handled by the caller.
     """
-    from scitokens.utils.errors import SciTokensException
-
     def _token_or_exception(func, *args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except SciTokensException as exc:
+        except TOKEN_ERROR as exc:
             return exc
 
     # read token directly from 'SCITOKEN{_FILE}' variable

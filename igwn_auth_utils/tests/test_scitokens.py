@@ -12,7 +12,6 @@ import time
 from unittest import mock
 
 from scitokens import SciToken
-from scitokens.utils.errors import NonHTTPSIssuer
 
 import pytest
 
@@ -24,6 +23,10 @@ AUDIENCE = "igwn_auth_utils"
 _SCOPE_PATH = "/igwn_auth_utils"
 READ_SCOPE = "read:{}".format(_SCOPE_PATH)
 WRITE_SCOPE = "write:{}".format(_SCOPE_PATH)
+
+
+def _os_error(*args, **kwargs):
+    raise OSError
 
 
 def _create_token(
@@ -182,6 +185,8 @@ def test_find_token_env_scitoken_file(
 
 
 @mock.patch.dict("os.environ")
+# make sure a real token doesn't get in the way
+@mock.patch("igwn_auth_utils.scitokens.SciToken.discover", _os_error)
 def test_find_token_condor_creds(
     rtoken,
     wtoken,
@@ -205,6 +210,8 @@ def test_find_token_condor_creds(
 
 
 @mock.patch.dict("os.environ")
+# make sure a real token doesn't get in the way
+@mock.patch("igwn_auth_utils.scitokens.SciToken.discover", _os_error)
 def test_find_token_error(rtoken, public_pem):
     # token with the wrong claims
     os.environ["SCITOKEN"] = rtoken.serialize().decode("utf-8")
@@ -222,11 +229,11 @@ def test_find_token_error(rtoken, public_pem):
 
 
 @mock.patch.dict("os.environ")
-@pytest.mark.parametrize(("skip_errors", "error_type", "message"), (
-    (False, NonHTTPSIssuer, "Issuer is not over HTTPS"),
-    (True, IgwnAuthError, "could not find a valid SciToken"),
+@pytest.mark.parametrize(("skip_errors", "message"), (
+    (False, "Issuer is not over HTTPS"),
+    (True, "could not find a valid SciToken"),
 ))
-def test_find_token_skip_errors(rtoken, skip_errors, error_type, message):
+def test_find_token_skip_errors(rtoken, skip_errors, message):
     """Check that the ``skip_errors`` keyword for `find_token()` works
     """
     # configure a valid token (wrong claims) **HOWEVER**
@@ -236,7 +243,7 @@ def test_find_token_skip_errors(rtoken, skip_errors, error_type, message):
     os.environ["SCITOKEN"] = rtoken.serialize().decode("utf-8")
 
     # check that we get the normal error
-    with pytest.raises(error_type) as exc:
+    with pytest.raises(IgwnAuthError) as exc:
         igwn_scitokens.find_token(
             AUDIENCE,
             READ_SCOPE,
