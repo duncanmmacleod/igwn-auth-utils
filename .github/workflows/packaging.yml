@@ -414,7 +414,7 @@ jobs:
           - 7
           - 8
     runs-on: ubuntu-latest
-    container: centos:8
+    container: rockylinux:8
     steps:
       - name: Download RPM
         uses: actions/download-artifact@v2
