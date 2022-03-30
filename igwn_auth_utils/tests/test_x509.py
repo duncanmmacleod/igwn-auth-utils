@@ -17,6 +17,7 @@ from unittest import mock
 
 from cryptography import x509
 from cryptography.x509.oid import NameOID
+from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import (
     hashes,
     serialization,
@@ -43,7 +44,7 @@ def x509cert(private_key, public_key):
         serial_number=1000,
         not_valid_before=now,
         not_valid_after=now + timedelta(seconds=86400),
-    ).sign(private_key, hashes.SHA256())
+    ).sign(private_key, hashes.SHA256(), backend=default_backend())
 
 
 def _write_x509(cert, path):
