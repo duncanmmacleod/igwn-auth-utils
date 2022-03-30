@@ -103,21 +103,25 @@ rpm:el8:
     - yum -y -q install
           findutils
           python${PY3}-coverage
-          python${PY3}-pytest
-          python${PY3}-pytest-cov
-          python${PY3}-requests-mock
     # install our package(s)
     - yum -y -q install *.rpm
+  script:
+    # the test suite requires packages that are too new to be handled
+    # by RHEL7 or RHEL8, so we can't test much here
+    - |
+      cat > test.py << EOF
+      from igwn_auth_utils import (x509, scitokens)
+      EOF
+    - python3 -m coverage run
+          --source=igwn_auth_utils
+          test.py
 
-# -- the test suite needs requests-mock,
-#    which isn't available for el7, hence
-#    no test:el7 job
-#test:el7:
-#  extends:
-#    - .test:el
-#    - .el7
-#  needs:
-#    - rpm:el7
+test:el7:
+  extends:
+    - .test:el
+    - .el7
+  needs:
+    - rpm:el7
 
 test:el8:
   extends:
