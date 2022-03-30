@@ -351,11 +351,11 @@ def get(url, *args, session=None, **kwargs):
         return session.get(url, *args, **kwargs)
 
     # new session
-    sess_kwargs = {k: kwargs.pop(k, None) for k in (
+    sess_kwargs = {k: kwargs.pop(k) for k in (
         "cert",
         "token",
         "token_audience",
         "token_scope",
-    )}
+    ) if k in kwargs}
     with Session(url=url, **sess_kwargs) as session:
         return session.get(url, *args, **kwargs)
