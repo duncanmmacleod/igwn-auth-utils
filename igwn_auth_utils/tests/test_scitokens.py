@@ -115,8 +115,9 @@ def _assert_claims_equal(a, b):
 # -- tests --------------------------------------
 
 @pytest.mark.parametrize(("scope", "validity"), (
-    (READ_SCOPE, True),
-    (WRITE_SCOPE, False),
+    (READ_SCOPE, True),  # read scope matches token
+    (WRITE_SCOPE, False),  # write scope doesn't
+    (None, False),  # token has scope, so one is enforced
 ))
 def test_is_valid_token(rtoken, scope, validity):
     assert igwn_scitokens.is_valid_token(rtoken, AUDIENCE, scope) is validity
