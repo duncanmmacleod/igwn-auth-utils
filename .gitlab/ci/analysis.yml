@@ -1,0 +1,22 @@
+# ---------------------------
+# Code Quality workflow
+# ---------------------------
+
+include:
+  # https://computing.docs.ligo.org/gitlab-ci-templates/
+  - project: computing/gitlab-ci-templates
+    # https://computing.docs.ligo.org/gitlab-ci-templates/python/
+    file: python.yml
+
+# -- code quality -----------
+#
+# These jobs check the code for
+# quality issues
+#
+
+flake8:
+  stage: Code quality
+  extends:
+    # https://computing.docs.ligo.org/gitlab-ci-templates/python/#.python:flake8
+    - .python:flake8
+  needs: []
