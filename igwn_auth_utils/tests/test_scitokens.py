@@ -26,6 +26,10 @@ READ_SCOPE = "read:{}".format(_SCOPE_PATH)
 WRITE_SCOPE = "write:{}".format(_SCOPE_PATH)
 
 
+def _os_error(*args, **kwargs):
+    raise OSError
+
+
 def _create_token(
     key=None,
     iss=ISSUER,
@@ -182,6 +186,8 @@ def test_find_token_env_scitoken_file(
 
 
 @mock.patch.dict("os.environ")
+# make sure a real token doesn't get in the way
+@mock.patch("igwn_auth_utils.scitokens.SciToken.discover", _os_error)
 def test_find_token_condor_creds(
     rtoken,
     wtoken,
@@ -205,6 +211,8 @@ def test_find_token_condor_creds(
 
 
 @mock.patch.dict("os.environ")
+# make sure a real token doesn't get in the way
+@mock.patch("igwn_auth_utils.scitokens.SciToken.discover", _os_error)
 def test_find_token_error(rtoken, public_pem):
     # token with the wrong claims
     os.environ["SCITOKEN"] = rtoken.serialize().decode("utf-8")
