@@ -40,14 +40,15 @@ def is_valid_token(token, audience, scope, timeleft=600):
 
     enforcer.add_validator("exp", _validate_timeleft)
 
+    # if scope wasn't given, borrow one from the token to pass validation
+    if scope is None:
+        scope = token["scope"].split(" ", 1)[0]
     # parse scope as scheme:path
-    authz = None
-    path = None
-    if scope is not None:
-        try:
-            authz, path = scope.split(":", 1)
-        except ValueError:
-            authz = scope
+    try:
+        authz, path = scope.split(":", 1)
+    except ValueError:
+        authz = scope
+        path = None
 
     # test
     return enforcer.test(token, authz, path=path)

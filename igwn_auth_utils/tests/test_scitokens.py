@@ -12,6 +12,7 @@ import time
 from unittest import mock
 
 from scitokens import SciToken
+from scitokens.scitokens import InvalidPathError
 
 import pytest
 
@@ -120,10 +121,15 @@ def _assert_claims_equal(a, b):
 @pytest.mark.parametrize(("scope", "validity"), (
     (READ_SCOPE, True),  # read scope matches token
     (WRITE_SCOPE, False),  # write scope doesn't
-    (None, False),  # token has scope, so one is enforced
+    (None, True),  # accept any scope
 ))
 def test_is_valid_token(rtoken, scope, validity):
     assert igwn_scitokens.is_valid_token(rtoken, AUDIENCE, scope) is validity
+
+
+def test_is_valid_token_invalid_path(rtoken):
+    with pytest.raises(InvalidPathError):
+        igwn_scitokens.is_valid_token(rtoken, AUDIENCE, "read")
 
 
 def test_load_token_file(rtoken_path, rtoken, public_pem):
