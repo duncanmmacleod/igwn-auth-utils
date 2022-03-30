@@ -10,11 +10,20 @@ __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 import os
 from pathlib import Path
 
-from .error import IgwnAuthError
+from jwt import InvalidTokenError
 from scitokens import (
     Enforcer,
     SciToken,
 )
+from scitokens.utils.errors import SciTokensException
+
+from .error import IgwnAuthError
+
+TOKEN_ERROR = (
+    InvalidTokenError,
+    SciTokensException,
+)
+
 
 WINDOWS = os.name == "nt"
 
@@ -170,12 +179,10 @@ def _find_tokens(**deserialize_kwargs):
     attempting to parse a token that was actually found, so that
     they can be handled by the caller.
     """
-    from scitokens.utils.errors import SciTokensException
-
     def _token_or_exception(func, *args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except SciTokensException as exc:
+        except TOKEN_ERROR as exc:
             return exc
 
     # read token directly from 'SCITOKEN{_FILE}' variable
