@@ -1,0 +1,22 @@
+# ---------------------------
+# Code coverage
+# ---------------------------
+
+include:
+  # https://computing.docs.ligo.org/gitlab-ci-templates/
+  - project: computing/gitlab-ci-templates
+    # https://computing.docs.ligo.org/gitlab-ci-templates/python/
+    file: python.yml
+
+# -- coverage ---------------
+#
+# This job combinces the individual
+# coverage reports from each job
+# to make a proper coverage result
+#
+
+coverage:
+  stage: Code coverage
+  extends:
+    # https://computing.docs.ligo.org/gitlab-ci-templates/python/#.python:coverage-combine
+    - .python:coverage-combine

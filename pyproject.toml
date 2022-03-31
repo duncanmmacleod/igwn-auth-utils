@@ -6,6 +6,18 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[tool.coverage.run]
+omit = [
+    "*/_version.py",
+]
+
+[tool.coverage.paths]
+source = [
+    "igwn_auth_utils/",
+    "/usr/lib/python*/*-packages/igwn_auth_utils/",
+    "/usr/local/lib/python*/*-packages/igwn_auth_utils/",
+]
+
 [tool.setuptools_scm]
 write_to = "igwn_auth_utils/_version.py"
 

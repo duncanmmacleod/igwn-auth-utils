@@ -114,6 +114,7 @@ rpm:el8:
       EOF
     - python3 -m coverage run
           --source=igwn_auth_utils
+          --omit=*/_version.py
           test.py
 
 test:el7:
