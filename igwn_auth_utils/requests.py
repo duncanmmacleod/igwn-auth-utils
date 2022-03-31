@@ -235,6 +235,7 @@ class SessionAuthMixin:
             token = self._find_token(
                 token_audience,
                 token_scope,
+                url=url,
                 error=bool(token),
             )
         if token:
@@ -275,9 +276,16 @@ class SessionAuthMixin:
         return _find_cred(find_x509_credentials, error=error)
 
     @staticmethod
-    def _find_token(audience, scope, error=True):
+    def _find_token(audience, scope, url=None, error=True):
         """Find a bearer token for authorization
         """
+        if audience is None and url is not None:
+            # default the audience to the scheme://fqdn of the target hots
+            # and ANY
+            audience = [
+                "{0.scheme}://{0.netloc}".format(urlparse(url)),
+                "ANY",
+            ]
         return _find_cred(find_scitoken, audience, scope, error=error)
 
     @staticmethod
@@ -351,11 +359,11 @@ def get(url, *args, session=None, **kwargs):
         return session.get(url, *args, **kwargs)
 
     # new session
-    sess_kwargs = {k: kwargs.pop(k, None) for k in (
+    sess_kwargs = {k: kwargs.pop(k) for k in (
         "cert",
         "token",
         "token_audience",
         "token_scope",
-    )}
+    ) if k in kwargs}
     with Session(url=url, **sess_kwargs) as session:
         return session.get(url, *args, **kwargs)
