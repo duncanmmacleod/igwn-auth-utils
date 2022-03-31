@@ -13,10 +13,7 @@ install:
   - call "%MINICONDA%\\Scripts\\activate.bat"
   - conda config --set always_yes yes
   - conda config --set channel_priority strict
-  - conda config --add channels conda-forge
-  - conda config --remove channels defaults
-  - appveyor-retry conda install --name base mamba
-  - appveyor-retry mamba create --quiet --yes --name ci
+  - appveyor-retry conda create --quiet --yes --name ci
         "pip"
         "python=%PYTHON_VERSION%"
         "setuptools>=27.3"
