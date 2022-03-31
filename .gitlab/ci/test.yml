@@ -19,6 +19,16 @@
     PYTEST_OPTIONS: "-ra -v --pyargs igwn_auth_utils.tests"
     # use python3
     PYTHON: "python3"
+  script:
+    # ignore _version.py in coverage
+    - |
+      cat > .coveragerc << EOF
+      [run]
+      omit =
+          */_version.py
+      EOF
+    # run the tests
+    - !reference [".python:pytest", script]
   # upload coverage file as an artifact to be combined later
   # then disable all other coverage reporting
   artifacts:
