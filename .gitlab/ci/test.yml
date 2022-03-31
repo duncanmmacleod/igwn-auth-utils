@@ -19,3 +19,14 @@
     PYTEST_OPTIONS: "-ra -v --pyargs igwn_auth_utils.tests"
     # use python3
     PYTHON: "python3"
+  # upload coverage file as an artifact to be combined later
+  # then disable all other coverage reporting
+  artifacts:
+    when: always
+    paths:
+      - .coverage-*
+    reports:
+      cobertura: null
+  # disable coverage total for test jobs, this is reported
+  # by the coverage job
+  coverage: null

@@ -4,6 +4,7 @@ stages:
   - Binary packages
   - Testing
   - Documentation
+  - Code coverage
   - Code quality
 
 include:
@@ -15,6 +16,8 @@ include:
   - local: '/.gitlab/ci/debian.yml'
   # Python tests
   - local: '/.gitlab/ci/python.yml'
+  # Code coverage
+  - local: '/.gitlab/ci/coverage.yml'
   # Code quality
   - local: '/.gitlab/ci/analysis.yml'
   # Documentation
