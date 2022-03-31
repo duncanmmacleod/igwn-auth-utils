@@ -45,4 +45,4 @@ Support
 -------
 
 To ask a question, report an issue, or suggest a change, please
-`open a ticket on GitHub <https://github.com/duncanmmacleod/igwn-auth-utils/issues/>`_.
+`open a ticket on GitHub <https://git.ligo.org/computing/igwn-auth-utils/-/issues/>`_.

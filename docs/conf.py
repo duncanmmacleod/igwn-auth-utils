@@ -17,7 +17,7 @@ author = "Duncan Macleod"
 top_module = igwn_auth_utils
 release = top_module.__version__
 version = release.split('.dev', 1)[0]
-git_url = "https://github.com/duncanmmacleod/{}".format(project)
+git_url = "https://git.ligo.org/computing/{}".format(project)
 
 # parse version number to get git reference
 _setuptools_scm_version_regex = re.compile(
