@@ -32,3 +32,14 @@ flake8:
 dependency_scanning:
   stage: Code quality
   needs: []
+  before_script:
+    - |
+      python -c "
+      from setuptools import Distribution
+      dist = Distribution()
+      dist.parse_config_files()
+      reqs = dist.setup_requires + dist.install_requires
+      for extra in ('requests', 'test',):
+          reqs.extend(dist.extras_require[extra])
+      print('\n'.join(reqs))
+      " | sort -u > requirements.txt
