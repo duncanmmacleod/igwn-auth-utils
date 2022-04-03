@@ -3,6 +3,8 @@
 # ---------------------------
 
 include:
+  # https://docs.gitlab.com/ee/user/application_security/dependency_scanning/
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
   # https://computing.docs.ligo.org/gitlab-ci-templates/
   - project: computing/gitlab-ci-templates
     # https://computing.docs.ligo.org/gitlab-ci-templates/python/
@@ -19,4 +21,14 @@ flake8:
   extends:
     # https://computing.docs.ligo.org/gitlab-ci-templates/python/#.python:flake8
     - .python:flake8
+  needs: []
+
+# -- dependency scanning ----
+#
+# This job checks for dependency
+# issues
+#
+
+dependency_scanning:
+  stage: Code quality
   needs: []
