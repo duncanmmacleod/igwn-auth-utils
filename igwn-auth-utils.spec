@@ -1,6 +1,6 @@
 %define srcname igwn-auth-utils
-%define version 0.2.0
-%define release 2
+%define version 0.2.1
+%define release 1
 
 Name:      python-%{srcname}
 Version:   %{version}
@@ -75,6 +75,11 @@ rm -rf $RPM_BUILD_ROOT
 # -- changelog
 
 %changelog
+* Mon Apr 04 2022 Duncan Macleod <duncan.macleod@ligo.org> - 0.2.1-1
+- update to 0.2.1
+- bump scitokens requirement
+- rename srpm to python-igwn-auth-utils
+
 * Tue Dec 21 2021 Duncan Macleod <duncan.macleod@ligo.org> - 0.2.0-2
 - remove unused buildrequires
 
