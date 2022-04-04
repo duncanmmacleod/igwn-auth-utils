@@ -24,12 +24,15 @@ flake8:
   needs: []
   before_script:
     # pick requirements out of the setup.cfg
+    - ${PYTHON} -m pip install setuptools --upgrade-strategy=only-if-needed
     - |
-      REQUIREMENTS=$(python -c "
-      from configparser import ConfigParser;
-      cp = ConfigParser();
-      cp.read('setup.cfg');
-      print(cp['options.extras_require']['lint'].strip())")
+      REQUIREMENTS=$(${PYTHON} -c "
+      from setuptools import Distribution
+      dist = Distribution()
+      dist.parse_config_files()
+      for req in dist.extras_require['lint']:
+          print(req)
+      ")
     # install things
     - !reference [".python:flake8", before_script]
 
