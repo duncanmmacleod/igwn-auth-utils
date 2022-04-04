@@ -73,7 +73,7 @@ def test_default_cert_path():
         os.environ["SYSTEMROOT"] = r"C:\WINDOWS"
         expected = r"C:\WINDOWS\Temp\x509up_123"
     else:
-        expected = r"/tmp/x509up_u123"
+        expected = r"/tmp/x509up_u123"  # noqa: S108
     assert igwn_x509._default_cert_path() == Path(expected)
 
 

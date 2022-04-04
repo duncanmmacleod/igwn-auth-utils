@@ -22,6 +22,19 @@ flake8:
     # https://computing.docs.ligo.org/gitlab-ci-templates/python/#.python:flake8
     - .python:flake8
   needs: []
+  before_script:
+    # pick requirements out of the setup.cfg
+    - ${PYTHON} -m pip install setuptools --upgrade-strategy=only-if-needed
+    - |
+      REQUIREMENTS=$(${PYTHON} -c "
+      from setuptools import Distribution
+      dist = Distribution()
+      dist.parse_config_files()
+      for req in dist.extras_require['lint']:
+          print(req)
+      ")
+    # install things
+    - !reference [".python:flake8", before_script]
 
 # -- dependency scanning ----
 #
