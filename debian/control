@@ -26,7 +26,7 @@ Depends:
  ${misc:Depends},
  ${python3:Depends},
  python3-cryptography,
- python3-scitokens (>= 1.5.0),
+ python3-scitokens (>= 1.7.0),
 Recommends:
  python3-requests,
  python3-safe-netrc,
