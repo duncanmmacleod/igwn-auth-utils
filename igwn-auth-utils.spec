@@ -36,7 +36,7 @@ SciTokens for use with HTTP(S) requests to IGWN-operated services.
 
 %package -n python%{python3_pkgversion}-%{srcname}
 Requires: python%{python3_pkgversion}-cryptography
-Requires: python%{python3_pkgversion}-scitokens >= 1.5.0
+Requires: python%{python3_pkgversion}-scitokens >= 1.7.0
 %if 0%{?rhel} == 0 || 0%{?rhel} >= 8
 Recommends: python%{python3_pkgversion}-requests
 Recommends: python%{python3_pkgversion}-safe-netrc
