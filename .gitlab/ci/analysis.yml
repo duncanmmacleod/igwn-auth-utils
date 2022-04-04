@@ -22,6 +22,16 @@ flake8:
     # https://computing.docs.ligo.org/gitlab-ci-templates/python/#.python:flake8
     - .python:flake8
   needs: []
+  before_script:
+    # pick requirements out of the setup.cfg
+    - |
+      REQUIREMENTS=$(python -c "
+      from configparser import ConfigParser;
+      cp = ConfigParser();
+      cp.read('setup.cfg');
+      print(cp['options.extras_require']['lint'].strip())")
+    # install things
+    - !reference [".python:flake8", before_script]
 
 # -- dependency scanning ----
 #
