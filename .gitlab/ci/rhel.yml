@@ -42,7 +42,7 @@ include:
     - tar --file ${TARBALL} --wildcards --strip-components 1 --get igwn-auth-utils*/*.spec igwn-auth-utils*/PKG-INFO
     - PKG_VERSION=$(grep ^Version PKG-INFO | cut -d\  -f2)
     - sed -i 's|define version\( *\)\(.*\)|define unmangled_version '${PKG_VERSION}'\n%define version '${PKG_VERSION/-/+}'|' *.spec
-    - sed -i 's|pypi_source|pypi_source %{name} %{unmangled_version}|' *.spec
+    - sed -i 's|pypi_source|pypi_source %{srcname} %{unmangled_version}|' *.spec
   script:
     - rpmbuild -bs
           --define "_srcrpmdir ${CI_PROJECT_DIR}"
@@ -71,7 +71,7 @@ srpm:el8:
     - .rhel:rpm
   stage: Binary packages
   variables:
-    SRPM: "igwn-auth-utils-*.src.rpm"
+    SRPM: "python-igwn-auth-utils-*.src.rpm"
 
 rpm:el7:
   extends:

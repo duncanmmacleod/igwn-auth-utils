@@ -1,8 +1,8 @@
-%define name    igwn-auth-utils
+%define srcname igwn-auth-utils
 %define version 0.2.0
 %define release 2
 
-Name:      %{name}
+Name:      python-%{srcname}
 Version:   %{version}
 Release:   %{release}%{?dist}
 Summary:   Authorisation utilities for IGWN
@@ -34,7 +34,7 @@ SciTokens for use with HTTP(S) requests to IGWN-operated services.
 
 # -- python-3X-igwn-auth-utils
 
-%package -n python%{python3_pkgversion}-%{name}
+%package -n python%{python3_pkgversion}-%{srcname}
 Requires: python%{python3_pkgversion}-cryptography
 Requires: python%{python3_pkgversion}-scitokens >= 1.5.0
 %if 0%{?rhel} == 0 || 0%{?rhel} >= 8
@@ -42,8 +42,8 @@ Recommends: python%{python3_pkgversion}-requests
 Recommends: python%{python3_pkgversion}-safe-netrc
 %endif
 Summary:  %{summary}
-%{?python_provide:%python_provide python%{python3_pkgversion}-%{name}}
-%description -n python%{python3_pkgversion}-%{name}
+%{?python_provide:%python_provide python%{python3_pkgversion}-%{srcname}}
+%description -n python%{python3_pkgversion}-%{srcname}
 Python library functions to simplify using IGWN authorisation credentials.
 This project is primarily aimed at discovering X.509 credentials and
 SciTokens for use with HTTP(S) requests to IGWN-operated services.
@@ -51,23 +51,23 @@ SciTokens for use with HTTP(S) requests to IGWN-operated services.
 # -- build steps
 
 %prep
-%autosetup -n %{name}-%{version}
+%autosetup -n %{srcname}-%{version}
 
 %build
-%py3_build
+%py3_build_wheel
 
 %install
-%py3_install
+%py3_install_wheel igwn_auth_utils-%{version}-*.whl
 
 %check
 cd %{_buildrootdir}
 PYTHONPATH=%{buildroot}%{python3_sitelib} \
-%{__python3} -m pip show %{name}
+%{__python3} -m pip show %{srcname}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files -n python%{python3_pkgversion}-%{name}
+%files -n python%{python3_pkgversion}-%{srcname}
 %license LICENSE
 %doc README.md
 %{python3_sitelib}/*
