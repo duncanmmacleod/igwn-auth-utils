@@ -117,7 +117,7 @@ def _default_cert_path(prefix="x509up_"):
         tmpdir = Path(os.environ["SYSTEMROOT"]) / "Temp"
         user = os.getlogin()
     else:  # Unix
-        tmpdir = "/tmp"
+        tmpdir = "/tmp"  # noqa: S108
         user = "u{}".format(os.getuid())
     return Path(tmpdir) / "{}{}".format(prefix, user)
 
