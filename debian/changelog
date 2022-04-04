@@ -1,3 +1,10 @@
+igwn-auth-utils (0.2.1-1) unstable; urgency=low
+
+  * update to 0.2.1
+  * bump scitokens requirement
+
+ -- Duncan Macleod <duncan.macleod@ligo.org>  Mon, 04 Apr 2022 15:33:00 +0100
+
 igwn-auth-utils (0.2.0-2) unstable; urgency=low
 
   * fix safe-netrc recommendation
