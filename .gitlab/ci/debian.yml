@@ -13,10 +13,10 @@ include:
 # -- macros
 
 .buster:
-  image: igwn/base:buster
+  image: igwn/builder:buster
 
 .bullseye:
-  image: igwn/base:bullseye
+  image: igwn/builder:bullseye
 
 # -- source packages --------
 #
