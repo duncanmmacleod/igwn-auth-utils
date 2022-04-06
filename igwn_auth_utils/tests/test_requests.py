@@ -126,7 +126,6 @@ class TestSession:
         assert sess.headers["Authorization"] == (
             igwn_requests.scitoken_authorization_header(rtoken)
         )
-        assert not sess.cert  # only one cred type is stored
 
     def test_token_serialized(self, rtoken):  # noqa: F811
         """Test that serialized tokens are handled properly
@@ -188,6 +187,36 @@ class TestSession:
         os.environ["NETRC"] = str(netrc)
         sess = self.Session(cert=False, token=False, url=url)
         assert sess.auth == auth
+
+    # -- all
+
+    @mock.patch("igwn_auth_utils.requests.find_scitoken")
+    @pytest.mark.parametrize(("cert", "token", "auth"), (
+        ("A", True, ("C", "D")),  # all
+        (False, True, ("C", "D")),  # no cert
+        ("A", False, ("C", "D")),  # no token
+        ("A", True, False),  # no auth
+        (False, False, ("C", "D")),  # no cert or token
+    ))
+    def test_multi_auth(
+        self,
+        find_token,
+        rtoken,  # noqa: F811
+        cert,
+        token,
+        auth,
+    ):
+        """Check that Session._init_auth records all auth options
+
+        In case a remote host accepts X.509 but not tokens, but the user
+        has a valid ANY token (for example).
+        """
+        find_token.return_value = rtoken
+        sess = self.Session(cert=cert, token=token, auth=auth)
+        assert sess.cert == (cert or None)
+        if token:
+            sess.headers["Authorization"].startswith("Bearer")
+        assert sess.auth == (auth or None)
 
 
 def test_get(requests_mock):

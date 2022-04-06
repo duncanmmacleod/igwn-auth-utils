@@ -212,26 +212,8 @@ class SessionAuthMixin:
         token_scope=None,
         url=None,
     ):
-        # -- user-provided objects
-        # the user gave us something specific, so always use it
-        dummy = (None, False, True)
-        if token not in dummy:
-            return self._set_token_header(token)
-
-        for attr, obj in (
-                ("cert", cert),
-                ("auth", auth),
-        ):
-            if obj not in dummy:
-                setattr(self, attr, obj)
-                return getattr(self, attr)
-
-        # -- the user didn't give us something specific,
-        #    so we go around the houses trying to find something
-        #    we can use
-
-        # bearer token
-        if token is not False:  # not disabled
+        # bearer token (scitoken)
+        if token in (None, True):
             token = self._find_token(
                 token_audience,
                 token_scope,
@@ -239,19 +221,21 @@ class SessionAuthMixin:
                 error=bool(token),
             )
         if token:
-            return self._set_token_header(token)
+            token = self._set_token_header(token)
 
         # cert auth
-        if cert is not False:  # not disabled
-            self.cert = self._find_x509_credentials(error=bool(cert))
-        if self.cert:
-            return self.cert
+        if cert in (None, True):  # not disabled and not given explicitly
+            cert = self._find_x509_credentials(error=bool(cert))
+        if cert:
+            self.cert = cert
 
         # basic auth (netrc)
-        if auth is not False:  # not disabled
-            self.auth = self._find_username_password(url)
+        if auth in (None, True):  # not disabled and not given explicitly
+            auth = self._find_username_password(url)
+        if auth:
+            self.auth = auth
 
-        return self.auth
+        return token or self.cert or self.auth
 
     def _set_token_header(self, token):
         """Serialise a `scitokens.SciToken` and format and store as an
