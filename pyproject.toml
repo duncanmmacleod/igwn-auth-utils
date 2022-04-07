@@ -6,20 +6,30 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
-[tool.coverage.run]
-omit = [
-    "*/_version.py",
-]
+# -- coverage.py
 
 [tool.coverage.paths]
+# map standard install paths back to the source to
+# enable merging coverage of installed module from
+# multiple platforms
 source = [
-    "igwn_auth_utils/",
+    "igwn_auth_utils/",  # <-- source path, must come first
     "/usr/lib/python*/*-packages/igwn_auth_utils/",
     "/usr/local/lib/python*/*-packages/igwn_auth_utils/",
 ]
 
-[tool.setuptools_scm]
-write_to = "igwn_auth_utils/_version.py"
+[tool.coverage.run]
+# don't report coverage for _version.py
+# (generated automatically by setuptools-scm)
+omit = [
+    "*/_version.py",
+]
+
+[tool.coverage.report]
+# print report with one decimal point
+precision = 1
+
+# -- pytest
 
 [tool.pytest.ini_options]
 addopts = "-r a --color=yes"
@@ -28,3 +38,8 @@ filterwarnings = [
 	# https://github.com/pyreadline/pyreadline/issues/65
 	"ignore:Using or importing the ABCs::pyreadline",
 ]
+
+# -- setuptools-scm
+
+[tool.setuptools_scm]
+write_to = "igwn_auth_utils/_version.py"
