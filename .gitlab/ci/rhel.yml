@@ -13,12 +13,12 @@ include:
 # -- macros
 
 .el7:
-  image: igwn/base:el7-testing
+  image: igwn/builder:el7-testing
   variables:
     EPEL: "true"
 
 .el8:
-  image: igwn/base:el8-testing
+  image: igwn/builder:el8-testing
   variables:
     EPEL: "true"
 
