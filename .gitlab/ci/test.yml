@@ -30,13 +30,10 @@
     # run the tests
     - !reference [".python:pytest", script]
   # upload coverage file as an artifact to be combined later
-  # then disable all other coverage reporting
   artifacts:
     when: always
     paths:
       - .coverage-*
-    reports:
-      cobertura: null
   # disable coverage total for test jobs, this is reported
   # by the coverage job
   coverage: null
