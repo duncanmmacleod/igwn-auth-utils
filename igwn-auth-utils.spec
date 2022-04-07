@@ -1,5 +1,5 @@
 %define srcname igwn-auth-utils
-%define version 0.2.1
+%define version 0.2.2
 %define release 1
 
 Name:      python-%{srcname}
@@ -75,6 +75,10 @@ rm -rf $RPM_BUILD_ROOT
 # -- changelog
 
 %changelog
+* Thu Apr 07 2022 Duncan Macleod <duncan.macleod@ligo.org> - 0.2.2-1
+- update to 0.2.2
+- add minimum versions for all runtime requirements
+
 * Mon Apr 04 2022 Duncan Macleod <duncan.macleod@ligo.org> - 0.2.1-1
 - update to 0.2.1
 - bump scitokens requirement
