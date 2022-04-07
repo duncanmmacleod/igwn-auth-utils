@@ -116,11 +116,15 @@ rpm:el8:
           --source=igwn_auth_utils
           --omit=*/_version.py
           test.py
+  artifacts:
+    reports:
+      junit: null
 
 test:el7:
   extends:
     - .test:el
     - .el7
+  image: igwn/base:el7-testing
   needs:
     - rpm:el7
 
@@ -128,6 +132,7 @@ test:el8:
   extends:
     - .test:el
     - .el8
+  image: igwn/base:el8-testing
   needs:
     - rpm:el8
 

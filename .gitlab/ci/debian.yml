@@ -117,6 +117,7 @@ test:buster:
   extends:
     - .test:debian
     - .buster
+  image: igwn/base:buster
   needs:
     - deb:buster
 
@@ -124,6 +125,7 @@ test:bullseye:
   extends:
     - .test:debian
     - .bullseye
+  image: igwn/base:bullseye
   needs:
     - deb:bullseye
 
