@@ -150,6 +150,26 @@ class TestSession:
         with pytest.raises(IgwnAuthError):
             self.Session(token=True)
 
+    @pytest.mark.parametrize(("url", "aud"), (
+        ("https://secret.example.com:8008", list({
+            "https://secret.example.com:8008",
+            "https://secret.example.com",
+            "ANY",
+        })),
+        (None, None)
+    ))
+    @mock.patch("igwn_auth_utils.requests.find_scitoken")
+    def test_token_audience_default(self, find_scitoken, url, aud):
+        """Check that the default `token_audience` is set correctly.
+        """
+        self.Session(
+            url=url,
+            token=True,
+            cert=False,
+            auth=False,
+        )
+        find_scitoken.assert_called_once_with(aud, None)
+
     # -- X.509
 
     def test_cert_explicit(self):
