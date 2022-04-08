@@ -264,12 +264,16 @@ class SessionAuthMixin:
         """Find a bearer token for authorization
         """
         if audience is None and url is not None:
-            # default the audience to the scheme://fqdn of the target hots
-            # and ANY
-            audience = [
-                "{0.scheme}://{0.netloc}".format(urlparse(url)),
-                "ANY",
-            ]
+            # default the audience to the scheme://fqdn of the target host,
+            # both including and excluding any ':port' suffix, and ANY
+            scheme, netloc = urlparse(url)[:2]
+            host = netloc.split(':', 1)[0]  # remove a :port suffix
+            if scheme and netloc:
+                audience = list({
+                    f"{scheme}://{netloc}",
+                    f"{scheme}://{host}",
+                    "ANY",
+                })
         return _find_cred(find_scitoken, audience, scope, error=error)
 
     @staticmethod
