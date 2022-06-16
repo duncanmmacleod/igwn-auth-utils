@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2021 Cardiff University
+# Copyright 2021-2022 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
 import inspect
@@ -12,7 +12,7 @@ import igwn_auth_utils
 # -- metadata ---------------
 
 project = "igwn-auth-utils"
-copyright = "2021 Cardiff University"
+copyright = "2021-2022 Cardiff University"
 author = "Duncan Macleod"
 top_module = igwn_auth_utils
 release = top_module.__version__
@@ -26,50 +26,53 @@ _setuptools_scm_version_regex = re.compile(
 if match := _setuptools_scm_version_regex.search(release):
     git_ref, = match.groups()
 else:
-    git_ref = 'v{}'.format(version)
+    git_ref = str(version)
 
 # -- sphinx config ----------
 
 needs_sphinx = "4.0"
 extensions = [
+    "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
     "sphinx.ext.linkcode",
     "sphinx.ext.napoleon",
-    "sphinx_automodapi.automodapi",
+    "sphinx_immaterial_igwn",
 ]
 default_role = "obj"
 
 # -- theme options ----------
 
-html_theme = "sphinx_material"
-html_sidebars = {
-    "**": [
-        "logo-text.html",
-        "globaltoc.html",
-        "localtoc.html",
-        "searchbox.html",
-    ],
-}
+html_theme = "sphinx_immaterial_igwn"
 html_theme_options = {
-    "repo_url": git_url,
     "repo_name": project,
-    "master_doc": False,
-    "nav_links": [],
+    "repo_type": "gitlab",
+    "repo_url": git_url,
 }
-html_static_path = ["_static"]
+html_static_path = [
+    "_static",
+]
+templates_path = [
+    "_templates",
+]
 
 # -- extensions -------------
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/", None),
-    "requests": ("https://docs.python-requests.org/en/stable/", None),
+    "requests": ("https://requests.readthedocs.io/en/stable/", None),
     "requests-gracedb": (
         "https://requests-gracedb.readthedocs.io/en/stable/",
         None,
     ),
 }
 
-automodapi_inherited_members = False
+autosummary_generate = True
+autoclass_content = "class"
+autodoc_default_flags = [
+    "show-inheritance",
+    "members",
+    "no-inherited-members",
+]
 
 
 def linkcode_resolve(domain, info):
@@ -110,10 +113,9 @@ def linkcode_resolve(domain, info):
         TypeError,  # source for object not found
         ValueError,  # file not
     ):
-        raise
         return None
 
-    return "{}/tree/{}/{}/{}".format(
+    return "{}/blob/{}/{}/{}".format(
         git_url,
         git_ref,
         top_module.__name__,
