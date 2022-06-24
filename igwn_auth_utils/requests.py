@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2021 Cardiff University
+# Copyright 2021-2022 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
 """Python Requests interface with IGWN authentication
@@ -17,11 +17,13 @@ from safe_netrc import netrc
 
 import requests
 
-from . import (
-    IgwnAuthError,
-    find_scitoken,
-    find_x509_credentials,
-    scitoken_authorization_header,
+from .error import IgwnAuthError
+from .scitokens import (
+    find_token as find_scitoken,
+    token_authorization_header as scitoken_authorization_header,
+)
+from .x509 import (
+    find_credentials as find_x509_credentials,
 )
 
 _auth_session_parameters = """
@@ -106,10 +108,6 @@ _auth_session_parameters = """
         credential was not actually discovered, or
         if ``fail_if_noauth=True`` is given and no authorisation
         token/credentials of any valid type are presented or discovered.
-
-    Note
-    ----
-    This class requires `Requests <https://requests.readthedocs.io/>`__.
 
     See also
     --------

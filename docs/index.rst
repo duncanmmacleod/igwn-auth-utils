@@ -12,7 +12,7 @@ authorisation credentials.
 
 For more information on the different types of credentials that
 IGWN member groups use, see
-`The IGWN Computing Guide <https://computing.docs.ligo.org/auth/>`_.
+`The IGWN Computing Guide <https://computing.docs.ligo.org/guide/auth/>`_.
 
 ============
 Installation
@@ -30,61 +30,22 @@ or `pip <https://pip.pypa.io>`_:
 
    python -m pip install igwn-auth-utils
 
+Binary packages are also available for various Debian and RHEL
+distributions supported by the LIGO Scientific Collaboration's
+Computing and Software Working Group, see
+`the IGWN Computing Guide <https://computing.docs.ligo.org/guide/software/>`__
+for details.
+
 =============
 Documentation
 =============
 
--------------------
-``igwn_auth_utils``
--------------------
+.. toctree::
+   :maxdepth: 1
 
-The ``igwn_auth_utils`` module provides the following objects:
-
-.. currentmodule:: igwn_auth_utils
-
-.. autosummary::
-   :toctree: api
-   :caption: igwn_auth_utils
-   :nosignatures:
-
-   ~find_scitoken
-   find_x509_credentials
-   scitoken_authorization_header
-   IgwnAuthError
-
-----------------------------
-``igwn_auth_utils.requests``
-----------------------------
-
-``igwn-auth-utils`` provides an optional `requests` interface in the
-``igwn_auth_utils.requests`` module.
-
-.. admonition:: ``igwn_auth_utils.requests`` has extra requirements
-
-    This module requires the following extra packages to be installed:
-
-    - `requests`
-    - `safe-netrc`
-
-    These can be installed with `pip` by specifying the `[requests]`
-    extra when installing ``igwn-auth-utils``:
-
-    .. code-block:: shell
-
-        python -m pip install igwn-auth-utils[requests]
-
-``igwn_auth_utils.requests`` provides the following classes/functions:
-
-.. currentmodule:: igwn_auth_utils.requests
-
-.. autosummary::
-   :toctree: api
-   :caption: igwn_auth_utils.requests
-   :nosignatures:
-
-   SessionAuthMixin
-   Session
-   get
+   HTTP(S) requests <requests>
+   SciTokens <scitokens>
+   X.509 <x509>
 
 =======
 Support

@@ -59,7 +59,7 @@ dependency_scanning:
       dist = Distribution()
       dist.parse_config_files()
       reqs = dist.setup_requires + dist.install_requires
-      for extra in ('requests', 'test',):
+      for extra in ('test',):
           reqs.extend(dist.extras_require[extra])
       print('\n'.join(reqs))
       " | sort -u > requirements.txt
@@ -81,7 +81,5 @@ license_scanning:
       dist = Distribution()
       dist.parse_config_files()
       reqs = dist.setup_requires + dist.install_requires
-      for extra in ('requests',):
-          reqs.extend(dist.extras_require[extra])
       print('\n'.join(reqs))
       " | sort -u > requirements.txt

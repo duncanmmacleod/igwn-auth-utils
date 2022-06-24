@@ -40,7 +40,7 @@ wheel:
   before_script:
     # resolve wildcard in wheel so we specify an extra
     - WHEEL=$(echo igwn_auth_utils-*.whl)
-    - INSTALL_TARGET="${WHEEL}[requests,test]"
+    - INSTALL_TARGET="${WHEEL}[test]"
     # configure from template
     - !reference [".python:pytest", before_script]
 
