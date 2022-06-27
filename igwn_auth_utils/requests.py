@@ -320,9 +320,33 @@ class Session(
 
     Examples
     --------
+    To use the default authorisation discovery:
+
     >>> from igwn_auth_utils.requests import Session
+    >>> with Session() as sess:
+    ...     sess.get("https://science.example.com/api/important/data")
+
+    To explicitly pass a specific :class:`~scitokens.SciToken` as the token:
+
     >>> with Session(token=mytoken) as sess:
-    ...     sess.get("https://my.science.stuff/data")
+    ...     sess.get("https://science.example.com/api/important/data")
+
+    To explicitly *require* that a token is discovered, and *disable*
+    any X.509 discovery:
+
+    >>> with Session(token=True, x509=False) as sess:
+    ...     sess.get("https://science.example.com/api/important/data")
+
+    To use default authorisation discovery, but fail if no credentials
+    are discovered:
+
+    >>> with Session(fail_if_noauth=True) as sess:
+    ...     sess.get("https://science.example.com/api/important/data")
+
+    To disable all authorisation discovery:
+
+    >>> with Session(force_noauth=True) as sess:
+    ...     sess.get("https://science.example.com/api/important/data")
     """
 
 
