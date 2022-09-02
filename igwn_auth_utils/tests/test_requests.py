@@ -87,7 +87,8 @@ class TestSession:
     # -- SessionAuthMixin
 
     def test_noauth_args(self):
-        """Test that `Session(force_noauth=True, fail_if_noauth=True)` is invalid
+        """Test that `Session(force_noauth=True, fail_if_noauth=True)`
+        is invalid.
         """
         with pytest.raises(ValueError):
             self.Session(force_noauth=True, fail_if_noauth=True)
