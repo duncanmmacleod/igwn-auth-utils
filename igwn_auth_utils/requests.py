@@ -328,7 +328,7 @@ def get(url, *args, session=None, **kwargs):
         the connection session to use, if not given one will be
         created on-the-fly
 
-    *args, **kwargs
+    args, kwargs
         all other keyword arguments are passed directly to
         `requests.Session.get`
 

@@ -64,7 +64,7 @@ def deserialize_token(raw, **kwargs):
     raw : `str`
         the raw serialised token content to deserialise
 
-    **kwargs
+    kwargs
         all keyword arguments are passed on to
         :meth:`scitokens.SciToken.deserialize`
 
@@ -89,7 +89,7 @@ def load_token_file(path, **kwargs):
     path : `str`
         the path to the scitokens file
 
-    **kwargs
+    kwargs
         all keyword arguments are passed on to :func:`deserialize_token`
 
     Returns
@@ -134,7 +134,7 @@ def find_token(audience, scope, timeleft=600, skip_errors=False, **kwargs):
         discovered tokens; this may be useful to skip over invalid
         or expired tokens that exist, for example.
 
-    **kwargs
+    kwargs
         all keyword arguments are passed on to
         :meth:`scitokens.SciToken.deserialize`
 
