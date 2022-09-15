@@ -17,6 +17,8 @@ from safe_netrc import netrc
 
 import requests
 
+from scitokens import SciToken
+
 from .error import IgwnAuthError
 from .scitokens import (
     find_token as find_scitoken,
@@ -193,8 +195,14 @@ class SessionAuthMixin:
         fail_if_noauth=False,
         **kwargs,
     ):
-        # initialise session
+        # initialise session and new attributes
         super().__init__(**kwargs)
+
+        #: The SciToken object to be serialised and sent with all requests,
+        #: this is only populated if a `~scitokens.SciToken` object is
+        #: passed directly, or discovered automatically (i.e. a serialised
+        #: token will not be deserialized and stored).
+        self.token = None
 
         # handle options
         if force_noauth and fail_if_noauth:
@@ -235,6 +243,8 @@ class SessionAuthMixin:
                 url=url,
                 error=bool(token),
             )
+        if isinstance(token, SciToken):
+            self.token = token
         if token:
             token = self._set_token_header(token)
 
@@ -348,6 +358,9 @@ class Session(
     >>> with Session(force_noauth=True) as sess:
     ...     sess.get("https://science.example.com/api/important/data")
     """
+    __attrs__ = requests.Session.__attrs__ = [
+        "token",
+    ]
 
 
 # update the docstrings to include the same parameter info
