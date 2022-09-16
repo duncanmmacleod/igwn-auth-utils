@@ -20,9 +20,10 @@ from .. import scitokens as igwn_scitokens
 from ..error import IgwnAuthError
 
 ISSUER = "local"
-AUDIENCE = "igwn_auth_utils"
 _SCOPE_PATH = "/igwn_auth_utils"
+READ_AUDIENCE = "igwn_auth_utils"
 READ_SCOPE = "read:{}".format(_SCOPE_PATH)
+WRITE_AUDIENCE = "igwn_auth_utils2"
 WRITE_SCOPE = "write:{}".format(_SCOPE_PATH)
 
 
@@ -33,7 +34,7 @@ def _os_error(*args, **kwargs):
 def _create_token(
     key=None,
     iss=ISSUER,
-    aud=AUDIENCE,
+    aud=READ_AUDIENCE,
     scope=READ_SCOPE,
     **kwargs
 ):
@@ -74,6 +75,7 @@ def rtoken(private_key):
 def wtoken(private_key):
     return _create_token(
         key=private_key,
+        aud=WRITE_AUDIENCE,
         scope=WRITE_SCOPE,
     )
 
@@ -124,19 +126,23 @@ def _assert_claims_equal(a, b):
     (None, True),  # accept any scope
 ))
 def test_is_valid_token(rtoken, scope, validity):
-    assert igwn_scitokens.is_valid_token(rtoken, AUDIENCE, scope) is validity
+    assert igwn_scitokens.is_valid_token(
+        rtoken,
+        READ_AUDIENCE,
+        scope,
+    ) is validity
 
 
 def test_is_valid_token_invalid_path(rtoken):
     with pytest.raises(InvalidPathError):
-        igwn_scitokens.is_valid_token(rtoken, AUDIENCE, "read")
+        igwn_scitokens.is_valid_token(rtoken, READ_AUDIENCE, "read")
 
 
 def test_load_token_file(rtoken_path, rtoken, public_pem):
     assert_tokens_equal(
         igwn_scitokens.load_token_file(
             rtoken_path,
-            audience=AUDIENCE,
+            audience=READ_AUDIENCE,
             insecure=True,
             public_key=public_pem,
         ),
@@ -153,7 +159,7 @@ def test_find_token_env_scitoken(rtoken, public_pem, envname):
     os.environ[envname] = rtoken.serialize(lifetime=86400).decode("utf-8")
     assert_tokens_equal(
         igwn_scitokens.find_token(
-            audience=AUDIENCE,
+            audience=READ_AUDIENCE,
             scope=READ_SCOPE,
             insecure=True,
             public_key=public_pem,
@@ -181,18 +187,17 @@ def test_find_token_env_scitoken_file(
     # and make sure we get the correct token back
     assert_tokens_equal(
         igwn_scitokens.find_token(
-            audience=AUDIENCE,
+            audience=READ_AUDIENCE,
             scope=READ_SCOPE,
             insecure=True,
             public_key=public_pem,
+            skip_errors=True,
         ),
         rtoken,
     )
 
 
 @mock.patch.dict("os.environ")
-# make sure a real token doesn't get in the way
-@mock.patch("igwn_auth_utils.scitokens.SciToken.discover", _os_error)
 def test_find_token_condor_creds(
     rtoken,
     wtoken,
@@ -200,38 +205,43 @@ def test_find_token_condor_creds(
     condor_creds_path,
 ):
     os.environ["_CONDOR_CREDS"] = str(condor_creds_path)
-    for token, scope in (
-        (rtoken, READ_SCOPE),
-        (wtoken, WRITE_SCOPE),
+    for token, aud, scope in (
+        (rtoken, READ_AUDIENCE, READ_SCOPE),
+        (wtoken, WRITE_AUDIENCE, WRITE_SCOPE),
     ):
+        print("TEST", token, aud, scope)
         assert_tokens_equal(
             igwn_scitokens.find_token(
-                audience=AUDIENCE,
+                audience=aud,
                 scope=scope,
                 insecure=True,
                 public_key=public_pem,
+                skip_errors=True,
             ),
             token,
         )
 
 
+@pytest.mark.parametrize(("audience", "msg"), [
+    (READ_AUDIENCE, "could not find a valid SciToken"),
+    (WRITE_AUDIENCE, "Invalid audience"),
+])
 @mock.patch.dict("os.environ")
 # make sure a real token doesn't get in the way
 @mock.patch("igwn_auth_utils.scitokens.SciToken.discover", _os_error)
-def test_find_token_error(rtoken, public_pem):
+def test_find_token_error(rtoken, public_pem, audience, msg):
     # token with the wrong claims
     os.environ["SCITOKEN"] = rtoken.serialize().decode("utf-8")
     # check that we get an error
     with pytest.raises(IgwnAuthError) as exc:
         igwn_scitokens.find_token(
-            AUDIENCE,
+            audience,
             WRITE_SCOPE,
             insecure=True,
             public_key=public_pem,
+            skip_errors=False,
         )
-    assert str(exc.value).startswith(
-        "could not find a valid SciToken",
-    )
+    assert str(exc.value).startswith(msg)
 
 
 @mock.patch.dict("os.environ")
@@ -251,7 +261,7 @@ def test_find_token_skip_errors(rtoken, skip_errors, message):
     # check that we get the normal error
     with pytest.raises(IgwnAuthError) as exc:
         igwn_scitokens.find_token(
-            AUDIENCE,
+            READ_AUDIENCE,
             READ_SCOPE,
             skip_errors=skip_errors,
         )

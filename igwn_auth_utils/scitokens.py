@@ -10,7 +10,10 @@ __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 import os
 from pathlib import Path
 
-from jwt import InvalidTokenError
+from jwt import (
+    InvalidAudienceError,
+    InvalidTokenError,
+)
 from scitokens import (
     Enforcer,
     SciToken,
@@ -20,6 +23,7 @@ from scitokens.utils.errors import SciTokensException
 from .error import IgwnAuthError
 
 TOKEN_ERROR = (
+    InvalidAudienceError,
     InvalidTokenError,
     SciTokensException,
 )
@@ -114,7 +118,7 @@ def load_token_file(path, **kwargs):
 
 # -- discovery --------------
 
-def find_token(audience, scope, timeleft=600, skip_errors=False, **kwargs):
+def find_token(audience, scope, timeleft=600, skip_errors=True, **kwargs):
     """Find and load a `SciToken` for the given ``audience`` and ``scope``.
 
     Parameters
@@ -132,7 +136,8 @@ def find_token(audience, scope, timeleft=600, skip_errors=False, **kwargs):
     skip_errors : `bool`, optional
         skip over errors encoutered when attempting to deserialise
         discovered tokens; this may be useful to skip over invalid
-        or expired tokens that exist, for example.
+        or expired tokens that exist, for example, which is why it
+        is the default behaviour.
 
     kwargs
         all keyword arguments are passed on to
@@ -202,23 +207,22 @@ def _find_tokens(**deserialize_kwargs):
                 **deserialize_kwargs,
             )
 
+    # try and find a token from HTCondor
+    for tokenfile in _find_condor_creds_token_paths():
+        yield _token_or_exception(
+            load_token_file,
+            tokenfile,
+            **deserialize_kwargs,
+        )
+
     try:
         yield _token_or_exception(SciToken.discover, **deserialize_kwargs)
-    except (
-        OSError,  # no token
-        AttributeError,  # windows doesn't have geteuid
-    ) as exc:
-        if isinstance(exc, AttributeError) and not (
-            WINDOWS
-            and "geteuid" in str(exc)
-        ):
+    except OSError:  # no token
+        pass  # try something else
+    except AttributeError as exc:
+        # windows doesn't have geteuid, that's ok, otherwise panic
+        if not WINDOWS or "geteuid" not in str(exc):
             raise
-        for tokenfile in _find_condor_creds_token_paths():
-            yield _token_or_exception(
-                load_token_file,
-                tokenfile,
-                **deserialize_kwargs,
-            )
 
 
 def _find_condor_creds_token_paths():
