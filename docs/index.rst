@@ -42,8 +42,14 @@ Documentation
 
 .. toctree::
    :maxdepth: 1
+   :caption: Using credentials
 
    HTTP(S) requests <requests>
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Credential utilities
+
    SciTokens <scitokens>
    X.509 <x509>
 
