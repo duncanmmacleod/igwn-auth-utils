@@ -2,11 +2,6 @@
 # See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
 version: 2
 
-# Set the version of Python and other tools you might need
-build:
-  tools:
-    python: "3.9"
-
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
   builder: html
@@ -14,6 +9,7 @@ sphinx:
 
 # Optionally declare the Python requirements required to build your docs
 python:
+  version: "3.9"
   install:
     - method: pip
       path: .
