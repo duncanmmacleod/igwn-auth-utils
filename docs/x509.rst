@@ -1,0 +1,17 @@
+.. sectionauthor:: Duncan Macleod <duncan.macleod@ligo.org>
+
+.. _igwn-auth-utils-x509:
+
+##############################
+Working with X.509 credentials
+##############################
+
+===
+API
+===
+
+.. autosummary::
+   :toctree: api
+   :nosignatures:
+
+   ~igwn_auth_utils.find_x509_credentials

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2021 Cardiff University
+# Copyright 2021-2022 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
 """Tests for :mod:`igwn_auth_utils.requests`.
@@ -14,12 +14,9 @@ from unittest import mock
 
 import pytest
 
-try:
-    from .. import requests as igwn_requests
-except ModuleNotFoundError as exc:  # pragma: no cover
-    pytest.skip(str(exc), allow_module_level=True)
-else:
-    from requests import RequestException
+from requests import RequestException
+
+from .. import requests as igwn_requests
 from ..error import IgwnAuthError
 from .test_scitokens import rtoken  # noqa: F401
 

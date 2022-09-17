@@ -20,8 +20,18 @@ docs:
   extends:
     # https://computing.docs.ligo.org/gitlab-ci-templates/python/#.python:sphinx
     - .python:sphinx
+  rules:
+    # production build (uses directory URLs which look nice)
+    - if: '$CI_PROJECT_NAMESPACE == "computing" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      variables:
+        BUILDER: "dirhtml"
+    # development build (doesn't use directory URLs, to support
+    #                    direct linking in gitlab CI artifacts)
+    - if: $CI_COMMIT_BRANCH
+      variables:
+        BUILDER: "html"
   before_script:
-    - python -m pip install .[docs,requests]
+    - python -m pip install .[docs]
 
 #
 # Publishing is done automatically

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2021 Cardiff University
+# Copyright 2021-2022 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
 """Python Requests interface with IGWN authentication
@@ -17,11 +17,13 @@ from safe_netrc import netrc
 
 import requests
 
-from . import (
-    IgwnAuthError,
-    find_scitoken,
-    find_x509_credentials,
-    scitoken_authorization_header,
+from .error import IgwnAuthError
+from .scitokens import (
+    find_token as find_scitoken,
+    token_authorization_header as scitoken_authorization_header,
+)
+from .x509 import (
+    find_credentials as find_x509_credentials,
 )
 
 _auth_session_parameters = """
@@ -30,28 +32,39 @@ _auth_session_parameters = """
 
     1.  if ``force_noauth=True`` is given, no auth is configured;
 
-    2.  if a bearer token is provided via the ``token`` keyword argument,
-        then use that;
+    2.  for SciTokens:
 
-    3.  if an X.509 credential path is provided via the ``cert`` keyword
-        argument, then use that;
+        1.  if a bearer token is provided via the ``token`` keyword argument,
+            then use that, or
 
-    4.  if ``auth`` keyword is provided, then use that;
+        2.  look for a bearer token by passing the ``token_audience``
+            and ``token_scope`` keyword parameters to
+            :func:`igwn_auth_utils.find_scitokens`;
 
-    5.  look for a bearer token by passing the ``token_audience``
-        and ``token_scope`` keyword parameters to
-        :func:`igwn_auth_utils.find_scitokens`;
+    3.  for X.509 credentials:
 
-    6.  look for an X.509 credential using
-        :func:`igwn_auth_utils.find_x509_credential`
+        1.  if an X.509 credential path is provided via the ``cert`` keyword
+            argument, then use that, or
 
-    7.  read the netrc file located at :file:`~/.netrc`, or at the path
-        stored in the :envvar:`NETRC` environment variable, and look
-        for a username and password matching the hostname given in the
-        ``url`` keyword argument;
+        2.  look for an X.509 credential using
+            :func:`igwn_auth_utils.find_x509_credential`
 
-    8.  if none of the above yield a credential, and ``fail_if_noauth=True``
+    4.  for basic auth (username/password):
+
+        1.  if ``auth`` keyword is provided, then use that, or
+
+        2.  read the netrc file located at :file:`~/.netrc`, or at the path
+            stored in the :envvar:`$NETRC` environment variable, and look
+            for a username and password matching the hostname given in the
+            ``url`` keyword argument;
+
+    5.  if none of the above yield a credential, and ``fail_if_noauth=True``
         was provided, raise a `ValueError`.
+
+    Steps 2-4 are all tried independently, with all valid credentials
+    (one per type) configured for the session.
+    It is up to the request receiver to handle the multiple credential
+    types and prioritise between them.
 
     Parameters
     ----------
@@ -101,20 +114,22 @@ _auth_session_parameters = """
 
     Raises
     ------
-    IgwnAuthError
+    ~igwn_auth_utils.IgwnAuthError
         If ``cert=True`` or ``token=True`` is given and the relevant
         credential was not actually discovered, or
         if ``fail_if_noauth=True`` is given and no authorisation
         token/credentials of any valid type are presented or discovered.
 
-    Note
-    ----
-    This class requires `Requests <https://requests.readthedocs.io/>`__.
-
     See also
     --------
     requests.Session
         for details of the standard options
+
+    igwn_auth_utils.find_scitoken
+        for details of the SciToken discovery
+
+    igwn_auth_utils.find_x509_credentials
+        for details of the X.509 credential discovery
     """.strip()
 
 
@@ -305,9 +320,33 @@ class Session(
 
     Examples
     --------
+    To use the default authorisation discovery:
+
     >>> from igwn_auth_utils.requests import Session
+    >>> with Session() as sess:
+    ...     sess.get("https://science.example.com/api/important/data")
+
+    To explicitly pass a specific :class:`~scitokens.SciToken` as the token:
+
     >>> with Session(token=mytoken) as sess:
-    ...     sess.get("https://my.science.stuff/data")
+    ...     sess.get("https://science.example.com/api/important/data")
+
+    To explicitly *require* that a token is discovered, and *disable*
+    any X.509 discovery:
+
+    >>> with Session(token=True, x509=False) as sess:
+    ...     sess.get("https://science.example.com/api/important/data")
+
+    To use default authorisation discovery, but fail if no credentials
+    are discovered:
+
+    >>> with Session(fail_if_noauth=True) as sess:
+    ...     sess.get("https://science.example.com/api/important/data")
+
+    To disable all authorisation discovery:
+
+    >>> with Session(force_noauth=True) as sess:
+    ...     sess.get("https://science.example.com/api/important/data")
     """
 
 
@@ -334,7 +373,7 @@ def get(url, *args, session=None, **kwargs):
 
     Returns
     -------
-    resp : `requets.Response`
+    resp : `requests.Response`
         the response object
 
     See also
