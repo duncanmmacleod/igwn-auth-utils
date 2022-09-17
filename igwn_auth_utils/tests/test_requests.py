@@ -121,6 +121,7 @@ class TestSession:
         """Test that tokens are handled properly
         """
         sess = self.Session(token=rtoken)
+        assert sess.token is rtoken
         assert sess.headers["Authorization"] == (
             igwn_requests.scitoken_authorization_header(rtoken)
         )
@@ -131,11 +132,14 @@ class TestSession:
         serialized = rtoken.serialize()
         sess = self.Session(token=serialized)
         assert sess.headers["Authorization"] == f"Bearer {serialized}"
+        # will not deserialise a token for storage
+        assert sess.token is None
 
     @mock.patch("igwn_auth_utils.requests.find_scitoken")
     def test_token_discovery(self, find_token, rtoken):  # noqa: F811
         find_token.return_value = rtoken
         sess = self.Session()
+        assert sess.token is rtoken
         assert sess.headers["Authorization"] == (
             igwn_requests.scitoken_authorization_header(rtoken)
         )
