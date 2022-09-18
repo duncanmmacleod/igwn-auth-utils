@@ -1,5 +1,5 @@
 %define srcname igwn-auth-utils
-%define version 0.2.3
+%define version 0.3.1
 %define release 1
 
 Name:      python-%{srcname}
@@ -73,6 +73,10 @@ rm -rf $RPM_BUILD_ROOT
 # -- changelog
 
 %changelog
+* Sun Sep 18 2022 Duncan Macleod <duncan.macleod@ligo.org> - 0.3.1-1
+- update to 0.3.1, 0.3.0 was forgotten in RPM
+- promote requests interface requirements from suggested to requires
+
 * Thu Jun 16 2022 Duncan Macleod <duncan.macleod@ligo.org> - 0.2.3-1
 - update to 0.2.3
 
