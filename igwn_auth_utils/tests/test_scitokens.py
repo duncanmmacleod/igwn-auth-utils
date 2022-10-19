@@ -138,6 +138,23 @@ def test_is_valid_token_invalid_path(rtoken):
         igwn_scitokens.is_valid_token(rtoken, READ_AUDIENCE, "read")
 
 
+@pytest.mark.parametrize("include_any", (False, True))
+@pytest.mark.parametrize(("url", "aud"), (
+    # basic
+    ("https://example.com/data", ["https://example.com"]),
+    # no scheme
+    ("example.com", ["https://example.com"]),
+    # port
+    ("https://example.com:443/data/test", ["https://example.com"]),
+    # HTTP
+    ("http://example.com:443/data/test", ["http://example.com"]),
+))
+def test_target_audience(url, aud, include_any):
+    if include_any:
+        aud += ["ANY"]
+    assert igwn_scitokens.target_audience(url, include_any=include_any) == aud
+
+
 def test_load_token_file(rtoken_path, rtoken, public_pem):
     assert_tokens_equal(
         igwn_scitokens.load_token_file(

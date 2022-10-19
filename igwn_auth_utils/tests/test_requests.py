@@ -153,11 +153,10 @@ class TestSession:
             self.Session(token=True)
 
     @pytest.mark.parametrize(("url", "aud"), (
-        ("https://secret.example.com:8008", list({
-            "https://secret.example.com:8008",
+        ("https://secret.example.com:8008", [
             "https://secret.example.com",
             "ANY",
-        })),
+        ]),
         (None, None)
     ))
     @mock.patch("igwn_auth_utils.requests.find_scitoken")

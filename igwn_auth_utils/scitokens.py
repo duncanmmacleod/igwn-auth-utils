@@ -9,6 +9,7 @@ __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 
 import os
 from pathlib import Path
+from urllib.parse import urlparse
 
 from jwt import (
     InvalidAudienceError,
@@ -69,6 +70,51 @@ def is_valid_token(token, audience, scope, timeleft=600):
 
     # test
     return enforcer.test(token, authz, path=path)
+
+
+def target_audience(url, include_any=True):
+    """Return the expected ``aud`` claim to authorize a request to ``url``.
+
+    Parameters
+    ----------
+    url : `str`
+        The URL that will be requested.
+
+    include_any : `bool`, optional
+        If `True`, include ``"ANY"`` in the return list of
+        audiences, otherwise, don't.
+
+    Returns
+    -------
+    audiences : `list` of `str`
+        A `list` of audience values (`str`), either of length 1
+        if ``include_any=False`, otherwise of length 2.
+
+    Examples
+    --------
+    >>> default_audience(
+    ...     "https://datafind.ligo.org:443/LDR/services/data/v1/gwf.json",
+    ...     include_any=True,
+    ... )
+    ["https://datafind.ligo.org", "ANY"]
+    >>> default_audience(
+    ...     "segments.ligo.org",
+    ...     include_any=False,
+    ... )
+    ["https://segments.ligo.org"]
+
+    Hostnames given without a URL scheme are presumed to be HTTPS:
+
+    >>> default_audience("datafind.ligo.org")
+    ["https://datafind.ligo.org"]
+    """
+    if "//" not in url:  # always match a hostname, not a path
+        url = f"//{url}"
+    parsed = urlparse(url, scheme="https")
+    aud = [f"{parsed.scheme}://{parsed.hostname}"]
+    if include_any:
+        aud.append("ANY")
+    return aud
 
 
 # -- I/O --------------------

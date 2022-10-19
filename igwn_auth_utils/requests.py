@@ -22,6 +22,7 @@ from scitokens import SciToken
 from .error import IgwnAuthError
 from .scitokens import (
     find_token as find_scitoken,
+    target_audience as scitoken_audience,
     token_authorization_header as scitoken_authorization_header,
 )
 from .x509 import (
@@ -295,16 +296,7 @@ class SessionAuthMixin:
         """Find a bearer token for authorization
         """
         if audience is None and url is not None:
-            # default the audience to the scheme://fqdn of the target host,
-            # both including and excluding any ':port' suffix, and ANY
-            scheme, netloc = urlparse(url)[:2]
-            host = netloc.split(':', 1)[0]  # remove a :port suffix
-            if scheme and netloc:
-                audience = list({
-                    f"{scheme}://{netloc}",
-                    f"{scheme}://{host}",
-                    "ANY",
-                })
+            audience = scitoken_audience(url, include_any=True)
         return _find_cred(find_scitoken, audience, scope, error=error)
 
     @staticmethod
