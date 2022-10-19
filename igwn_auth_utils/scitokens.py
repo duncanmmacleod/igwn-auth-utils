@@ -35,6 +35,19 @@ WINDOWS = os.name == "nt"
 
 
 def is_valid_token(token, audience, scope, timeleft=600):
+    """Test whether ``token`` matches the ``audience`` and ``scope``.
+
+    Parameters
+    ----------
+    token : `scitokens.SciToken`
+        The token to test.
+
+    audience : `str`, `list` or `str`
+        The audience(s) to accept.
+
+    scope : `str`
+        A single scope to validate.
+    """
     enforcer = Enforcer(token["iss"], audience=audience)
 
     # add validator for timeleft
