@@ -82,8 +82,13 @@ _auth_session_parameters = """
         - `None`: try and discover a valid token, but
           try something else if that fails
 
-    token_audience, token_scope : `str`
-        The ``audience`` and ``scope`` to pass to
+    token_audience : `str`, list` of `str`
+        The value(s) of the audience (``aud``) claim to pass to
+        :func:`igwn_auth_utils.find_scitoken` when discovering
+        available tokens.
+
+    token_scope : `str`
+        The value(s) of the ``scope``  ``audience`` and ``scope`` to pass to
         :func:`igwn_auth_utils.find_scitoken` when discovering
         available tokens.
 
@@ -104,8 +109,9 @@ _auth_session_parameters = """
         object to attach to a `~requests.Request`
 
     url : `str`, optional
-        the URL that will be queried within this session; this is only
-        used to access credentials via :mod:`safe_netrc`.
+        the URL/host that will be queried within this session; this is used
+        to set the default ``token_audience`` and to access credentials
+        via :mod:`safe_netrc`.
 
     force_noauth : `bool`, optional
         Disable the use of any authorisation credentials (mainly for testing).
