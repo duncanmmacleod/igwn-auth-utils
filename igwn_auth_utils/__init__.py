@@ -9,6 +9,7 @@ __license__ = "BSD-3-Clause"
 from .error import IgwnAuthError
 from .requests import (
     get,
+    request,
     Session,
     SessionAuthMixin,
     SessionErrorMixin,

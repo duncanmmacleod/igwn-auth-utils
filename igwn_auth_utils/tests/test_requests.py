@@ -11,6 +11,7 @@ __credits__ = "Leo Singer <leo.singer@ligo.org>"
 import os
 import stat
 from unittest import mock
+from urllib.parse import urlencode
 
 import pytest
 
@@ -257,5 +258,23 @@ def test_get_session(mock_session):
     """
     session = mock.MagicMock()
     assert igwn_requests.get("https://test.org", session=session)
-    session.get.assert_called_once_with("https://test.org")
+    session.request.assert_called_once_with("get", "https://test.org")
     mock_session.assert_not_called()
+
+
+def test_post(requests_mock):
+    """Test that `igwn_auth_utils.requests.post` can perform a simple request.
+    """
+    data = {"a": 1, "b": 2}
+    requests_mock.post(
+        "https://example.com",
+        text="THANKS",
+    )
+    # check that the correct response got passed through
+    assert igwn_requests.post(
+        "https://example.com",
+        data=data,
+    ).text == "THANKS"
+    # check that the data was encoded into the request properly
+    req = requests_mock.request_history[0]
+    assert req.body == urlencode(data)

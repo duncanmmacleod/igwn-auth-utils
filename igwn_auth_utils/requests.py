@@ -368,21 +368,24 @@ for _obj in (Session, SessionAuthMixin):
     _obj.__doc__ = _obj.__doc__.format(parameters=_auth_session_parameters)
 
 
-def get(url, *args, session=None, **kwargs):
-    """Request data from a URL via an HTTP ``'GET'`` request
+def request(method, url, *args, session=None, **kwargs):
+    """Send a request of the specific method to the specified URL.
 
     Parameters
     ----------
+    method : `str`
+        The method to use.
+
     url : `str`,
-        the URL to request
+        The URL to request.
 
     session : `requests.Session`, optional
-        the connection session to use, if not given one will be
-        created on-the-fly
+        The connection session to use, if not given one will be
+        created on-the-fly.
 
     args, kwargs
-        all other keyword arguments are passed directly to
-        `requests.Session.get`
+        All other keyword arguments are passed directly to
+        `requests.Session.request`
 
     Returns
     -------
@@ -391,12 +394,12 @@ def get(url, *args, session=None, **kwargs):
 
     See also
     --------
-    requests.Session.get
+    requests.Session.request
         for information on how the request is performed
     """
     # user's session
     if session:
-        return session.get(url, *args, **kwargs)
+        return session.request(method, url, *args, **kwargs)
 
     # new session
     sess_kwargs = {k: kwargs.pop(k) for k in (
@@ -406,4 +409,52 @@ def get(url, *args, session=None, **kwargs):
         "token_scope",
     ) if k in kwargs}
     with Session(url=url, **sess_kwargs) as session:
-        return session.get(url, *args, **kwargs)
+        return session.request(method, url, *args, **kwargs)
+
+
+_request_wrapper_doc = """
+    Send an HTTP {METHOD} request to the specified URL with IGWN Auth attached.
+
+    Parameters
+    ----------
+    url : `str`
+        The URL to request.
+
+    session : `requests.Session`, optional
+        The connection session to use, if not given one will be
+        created on-the-fly.
+
+    args, kwargs
+        All other keyword arguments are passed directly to
+        :meth:`requests.Session.{method}`
+
+    Returns
+    -------
+    resp : `requests.Response`
+        the response object
+
+    See also
+    --------
+    requests.Session.{method}
+        for information on how the request is performed
+""".strip()
+
+
+def _request_wrapper_factory(method):
+    def _request_wrapper(url, *args, session=None, **kwargs):
+        return request(method, url, *args, session=session, **kwargs)
+
+    _request_wrapper.__doc__ = _request_wrapper_doc.format(
+        method=method,
+        METHOD=method.upper(),
+    )
+    return _request_wrapper
+
+
+# request methods
+delete = _request_wrapper_factory("delete")
+get = _request_wrapper_factory("get")
+head = _request_wrapper_factory("head")
+patch = _request_wrapper_factory("patch")
+post = _request_wrapper_factory("post")
+put = _request_wrapper_factory("put")
