@@ -22,6 +22,7 @@ from scitokens import SciToken
 from .error import IgwnAuthError
 from .scitokens import (
     find_token as find_scitoken,
+    target_audience as scitoken_audience,
     token_authorization_header as scitoken_authorization_header,
 )
 from .x509 import (
@@ -82,8 +83,13 @@ _auth_session_parameters = """
         - `None`: try and discover a valid token, but
           try something else if that fails
 
-    token_audience, token_scope : `str`
-        The ``audience`` and ``scope`` to pass to
+    token_audience : `str`, list` of `str`
+        The value(s) of the audience (``aud``) claim to pass to
+        :func:`igwn_auth_utils.find_scitoken` when discovering
+        available tokens.
+
+    token_scope : `str`
+        The value(s) of the ``scope``  ``audience`` and ``scope`` to pass to
         :func:`igwn_auth_utils.find_scitoken` when discovering
         available tokens.
 
@@ -104,8 +110,9 @@ _auth_session_parameters = """
         object to attach to a `~requests.Request`
 
     url : `str`, optional
-        the URL that will be queried within this session; this is only
-        used to access credentials via :mod:`safe_netrc`.
+        the URL/host that will be queried within this session; this is used
+        to set the default ``token_audience`` and to access credentials
+        via :mod:`safe_netrc`.
 
     force_noauth : `bool`, optional
         Disable the use of any authorisation credentials (mainly for testing).
@@ -289,16 +296,7 @@ class SessionAuthMixin:
         """Find a bearer token for authorization
         """
         if audience is None and url is not None:
-            # default the audience to the scheme://fqdn of the target host,
-            # both including and excluding any ':port' suffix, and ANY
-            scheme, netloc = urlparse(url)[:2]
-            host = netloc.split(':', 1)[0]  # remove a :port suffix
-            if scheme and netloc:
-                audience = list({
-                    f"{scheme}://{netloc}",
-                    f"{scheme}://{host}",
-                    "ANY",
-                })
+            audience = scitoken_audience(url, include_any=True)
         return _find_cred(find_scitoken, audience, scope, error=error)
 
     @staticmethod
