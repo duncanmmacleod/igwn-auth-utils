@@ -11,7 +11,10 @@ import os
 import time
 from unittest import mock
 
-from scitokens import SciToken
+from scitokens import (
+    __version__ as scitokens_version,
+    SciToken,
+)
 from scitokens.scitokens import InvalidPathError
 
 import pytest
@@ -226,7 +229,6 @@ def test_find_token_condor_creds(
         (rtoken, READ_AUDIENCE, READ_SCOPE),
         (wtoken, WRITE_AUDIENCE, WRITE_SCOPE),
     ):
-        print("TEST", token, aud, scope)
         assert_tokens_equal(
             igwn_scitokens.find_token(
                 audience=aud,
@@ -241,7 +243,10 @@ def test_find_token_condor_creds(
 
 @pytest.mark.parametrize(("audience", "msg"), [
     (READ_AUDIENCE, "could not find a valid SciToken"),
-    (WRITE_AUDIENCE, "Invalid audience"),
+    (WRITE_AUDIENCE, (
+        "could not find a valid SciToken" if scitokens_version >= "1.7.3"
+        else "Invalid audience"
+    )),
 ])
 @mock.patch.dict("os.environ")
 # make sure a real token doesn't get in the way
@@ -250,7 +255,10 @@ def test_find_token_error(rtoken, public_pem, audience, msg):
     # token with the wrong claims
     os.environ["SCITOKEN"] = rtoken.serialize().decode("utf-8")
     # check that we get an error
-    with pytest.raises(IgwnAuthError) as exc:
+    with pytest.raises(
+        IgwnAuthError,
+        match=msg,
+    ):
         igwn_scitokens.find_token(
             audience,
             WRITE_SCOPE,
@@ -258,7 +266,6 @@ def test_find_token_error(rtoken, public_pem, audience, msg):
             public_key=public_pem,
             skip_errors=False,
         )
-    assert str(exc.value).startswith(msg)
 
 
 @mock.patch.dict("os.environ")
@@ -276,13 +283,15 @@ def test_find_token_skip_errors(rtoken, skip_errors, message):
     os.environ["SCITOKEN"] = rtoken.serialize().decode("utf-8")
 
     # check that we get the normal error
-    with pytest.raises(IgwnAuthError) as exc:
+    with pytest.raises(
+        IgwnAuthError,
+        match=message,
+    ):
         igwn_scitokens.find_token(
             READ_AUDIENCE,
             READ_SCOPE,
             skip_errors=skip_errors,
         )
-    assert str(exc.value).startswith(message)
 
 
 @mock.patch.dict("os.environ")

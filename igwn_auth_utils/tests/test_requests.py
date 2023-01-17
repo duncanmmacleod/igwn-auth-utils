@@ -76,11 +76,11 @@ class TestSession:
         )
 
         # with the kwarg a RequestException is raised
-        with pytest.raises(RequestException) as exc:
+        with pytest.raises(
+            RequestException,
+            match=r"404 Client Error: not found for url: https://test.org/",
+        ):
             igwn_requests.get("https://test.org")
-        assert str(exc.value) == (
-            "404 Client Error: not found for url: https://test.org/"
-        )
 
     # -- SessionAuthMixin
 
