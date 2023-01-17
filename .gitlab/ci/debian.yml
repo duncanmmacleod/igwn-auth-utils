@@ -99,6 +99,12 @@ deb:bullseye:
     # setup local apt repository
     - apt-get -y -q -q install local-apt-repository
     - mkdir -pv /srv/local-apt-repository
+    - |
+      cat > /etc/apt/preferences.d/99local-apt-repository << EOF
+      Package: *
+      Pin: origin ""
+      Pin-Priority: 1001
+      EOF
     # fill our local apt repo and rebuild it
     - mv -v *.deb /srv/local-apt-repository
     - /usr/lib/local-apt-repository/rebuild
