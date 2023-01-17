@@ -11,7 +11,10 @@ import os
 import time
 from unittest import mock
 
-from scitokens import SciToken
+from scitokens import (
+    __version__ as scitokens_version,
+    SciToken,
+)
 from scitokens.scitokens import InvalidPathError
 
 import pytest
@@ -241,7 +244,10 @@ def test_find_token_condor_creds(
 
 @pytest.mark.parametrize(("audience", "msg"), [
     (READ_AUDIENCE, "could not find a valid SciToken"),
-    (WRITE_AUDIENCE, "Invalid audience"),
+    (WRITE_AUDIENCE, (
+        "could not find a valid SciToken" if scitokens_version >= "1.7.3"
+        else "Invalid audience"
+    )),
 ])
 @mock.patch.dict("os.environ")
 # make sure a real token doesn't get in the way
