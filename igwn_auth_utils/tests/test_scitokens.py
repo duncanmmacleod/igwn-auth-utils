@@ -250,7 +250,10 @@ def test_find_token_error(rtoken, public_pem, audience, msg):
     # token with the wrong claims
     os.environ["SCITOKEN"] = rtoken.serialize().decode("utf-8")
     # check that we get an error
-    with pytest.raises(IgwnAuthError) as exc:
+    with pytest.raises(
+        IgwnAuthError,
+        match=msg,
+    ):
         igwn_scitokens.find_token(
             audience,
             WRITE_SCOPE,
@@ -258,7 +261,6 @@ def test_find_token_error(rtoken, public_pem, audience, msg):
             public_key=public_pem,
             skip_errors=False,
         )
-    assert str(exc.value).startswith(msg)
 
 
 @mock.patch.dict("os.environ")
@@ -276,13 +278,15 @@ def test_find_token_skip_errors(rtoken, skip_errors, message):
     os.environ["SCITOKEN"] = rtoken.serialize().decode("utf-8")
 
     # check that we get the normal error
-    with pytest.raises(IgwnAuthError) as exc:
+    with pytest.raises(
+        IgwnAuthError,
+        match=message,
+    ):
         igwn_scitokens.find_token(
             READ_AUDIENCE,
             READ_SCOPE,
             skip_errors=skip_errors,
         )
-    assert str(exc.value).startswith(message)
 
 
 @mock.patch.dict("os.environ")

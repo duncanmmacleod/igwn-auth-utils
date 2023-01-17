@@ -86,11 +86,11 @@ def test_validate_certificate_path(x509cert_path):
 
 
 def test_validate_certificate_expiry_error(x509cert):
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(
+        ValueError,
+        match="X.509 certificate has less than 10000000000 seconds remaining",
+    ):
         igwn_x509.validate_certificate(x509cert, timeleft=int(1e10))
-    assert str(exc.value) == (
-        "X.509 certificate has less than 10000000000 seconds remaining"
-    )
 
 
 def test_is_valid_certificate(x509cert_path):
@@ -182,8 +182,8 @@ def test_find_credentials_error(_):
         os.environ.pop(f"X509_USER_{suffix}", None)
 
     # check that we can't find any credentials
-    with pytest.raises(IgwnAuthError) as exc:
+    with pytest.raises(
+        IgwnAuthError,
+        match="could not find an RFC-3820 compliant X.509 credential",
+    ):
         igwn_x509.find_credentials()
-    assert str(exc.value).startswith(
-        "could not find an RFC-3820 compliant X.509 credential",
-    )
