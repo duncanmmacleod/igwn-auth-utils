@@ -229,7 +229,6 @@ def test_find_token_condor_creds(
         (rtoken, READ_AUDIENCE, READ_SCOPE),
         (wtoken, WRITE_AUDIENCE, WRITE_SCOPE),
     ):
-        print("TEST", token, aud, scope)
         assert_tokens_equal(
             igwn_scitokens.find_token(
                 audience=aud,
