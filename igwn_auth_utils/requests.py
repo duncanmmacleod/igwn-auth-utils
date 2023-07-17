@@ -121,6 +121,11 @@ _auth_session_parameters = """
         Raise a `~igwn_auth_utils.IgwnAuthError` if no authorisation
         credentials are presented or discovered.
 
+    raise_for_status : `bool`, optional
+        If `True` (default), automatically call
+        :meth:`~requests.Response.raise_for_status` after receiving
+        any response.
+
     Raises
     ------
     ~igwn_auth_utils.IgwnAuthError
@@ -175,10 +180,12 @@ class SessionErrorMixin:
     authored by Leo Singer.
     """
     def __init__(self, *args, **kwargs):
+        raise_for_status = kwargs.pop("raise_for_status", True)
         super().__init__(*args, **kwargs)
-        self.hooks.setdefault("response", []).append(
-            _hook_raise_for_status,
-        )
+        if raise_for_status:
+            self.hooks.setdefault("response", []).append(
+                _hook_raise_for_status,
+            )
 
 
 class SessionAuthMixin:
