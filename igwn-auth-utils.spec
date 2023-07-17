@@ -24,6 +24,7 @@ BuildRequires: python3-rpm-macros
 
 # build dependencies
 BuildRequires: python%{python3_pkgversion}-devel
+BuildRequires: python%{python3_pkgversion}-pip
 BuildRequires: python%{python3_pkgversion}-setuptools >= 38.2.5
 BuildRequires: python%{python3_pkgversion}-setuptools_scm
 BuildRequires: python%{python3_pkgversion}-wheel
