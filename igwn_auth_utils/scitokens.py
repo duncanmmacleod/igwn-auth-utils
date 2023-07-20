@@ -55,6 +55,10 @@ def is_valid_token(
     scope : `str`
         A single scope to enforce.
 
+    timeleft : `float`
+        The amount of time remaining (in seconds, from the `exp` claim)
+        to require.
+
     issuer : `str`
         The value of the `iss` claim to enforce.
 
@@ -202,7 +206,14 @@ def load_token_file(path, **kwargs):
 
 # -- discovery --------------
 
-def find_token(audience, scope, timeleft=600, skip_errors=True, **kwargs):
+def find_token(
+    audience,
+    scope,
+    issuer=None,
+    timeleft=600,
+    skip_errors=True,
+    **kwargs,
+):
     """Find and load a `SciToken` for the given ``audience`` and ``scope``.
 
     Parameters
@@ -212,6 +223,9 @@ def find_token(audience, scope, timeleft=600, skip_errors=True, **kwargs):
 
     scope : `str`
         the required scope (``scope``).
+
+    issuer : `str`
+        the value of the `iss` claim to enforce.
 
     timeleft : `int`
         minimum required time left until expiry (in seconds)
@@ -255,7 +269,13 @@ def find_token(audience, scope, timeleft=600, skip_errors=True, **kwargs):
             raise IgwnAuthError(str(error)) from error  # stop here and raise
 
         # if this token is valid, stop here and return it
-        if is_valid_token(token, audience, scope, timeleft):
+        if is_valid_token(
+            token,
+            audience,
+            scope,
+            issuer=issuer,
+            timeleft=timeleft,
+        ):
             return token
 
     # if we didn't find any valid tokens:
