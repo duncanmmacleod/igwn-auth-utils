@@ -407,12 +407,17 @@ def request(method, url, *args, session=None, **kwargs):
         return session.request(method, url, *args, **kwargs)
 
     # new session
-    sess_kwargs = {k: kwargs.pop(k) for k in (
-        "cert",
-        "token",
-        "token_audience",
-        "token_scope",
-    ) if k in kwargs}
+    sess_kwargs = {
+        k: kwargs.pop(k) for k in (
+            "token",
+            "token_audience",
+            "token_scope",
+            "cert",
+            "auth",
+            "force_noauth",
+            "fail_if_noauth",
+        ) if k in kwargs
+    }
     with Session(url=url, **sess_kwargs) as session:
         return session.request(method, url, *args, **kwargs)
 
