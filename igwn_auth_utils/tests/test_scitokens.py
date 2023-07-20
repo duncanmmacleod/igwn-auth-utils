@@ -164,6 +164,23 @@ def test_is_valid_token_serialized_false():
     ) is False
 
 
+@pytest.mark.parametrize(("issuer", "result"), [
+    (None, True),
+    ("local", True),
+    ("other", False),
+])
+def test_is_valid_token_issuer(rtoken, issuer, result):
+    """Test that `igwn_auth_utils.scitokens.is_valid_token` enforces
+    ``issuer`` properly.
+    """
+    assert igwn_scitokens.is_valid_token(
+        rtoken,
+        READ_AUDIENCE,
+        None,
+        issuer=issuer,
+    ) is result
+
+
 @pytest.mark.parametrize("include_any", (False, True))
 @pytest.mark.parametrize(("url", "aud"), (
     # basic
