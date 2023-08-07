@@ -40,8 +40,8 @@ def is_valid_token(token, audience, scope, timeleft=600):
 
     Parameters
     ----------
-    token : `scitokens.SciToken`
-        The token to test.
+    token : `scitokens.SciToken`, `str`
+        The token object, or serialisation, to test
 
     audience : `str`, `list` or `str`
         The audience(s) to accept.
@@ -49,6 +49,14 @@ def is_valid_token(token, audience, scope, timeleft=600):
     scope : `str`
         A single scope to validate.
     """
+    # if given a serialised token, deserialise it now
+    if isinstance(token, (str, bytes)):
+        try:
+            token = SciToken.deserialize(token)
+        except (InvalidTokenError, SciTokensException):
+            return False
+
+    # construct the enforcer
     enforcer = Enforcer(token["iss"], audience=audience)
 
     # add validator for timeleft

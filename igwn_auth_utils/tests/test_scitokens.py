@@ -9,6 +9,7 @@ __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 
 import os
 import time
+from functools import partial
 from unittest import mock
 
 from scitokens import (
@@ -139,6 +140,28 @@ def test_is_valid_token(rtoken, scope, validity):
 def test_is_valid_token_invalid_path(rtoken):
     with pytest.raises(InvalidPathError):
         igwn_scitokens.is_valid_token(rtoken, READ_AUDIENCE, "read")
+
+
+def test_is_valid_token_serialized(rtoken, public_pem):
+    _deserialize_local = partial(
+        SciToken.deserialize,
+        insecure=True,
+        public_key=public_pem,
+    )
+    with mock.patch("scitokens.SciToken.deserialize", _deserialize_local):
+        assert igwn_scitokens.is_valid_token(
+            rtoken.serialize(lifetime=86400),
+            READ_AUDIENCE,
+            READ_SCOPE,
+        )
+
+
+def test_is_valid_token_serialized_false():
+    assert igwn_scitokens.is_valid_token(
+        "bad",
+        READ_AUDIENCE,
+        READ_SCOPE,
+    ) is False
 
 
 @pytest.mark.parametrize("include_any", (False, True))
