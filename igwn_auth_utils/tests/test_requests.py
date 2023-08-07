@@ -261,6 +261,19 @@ def test_get_session(mock_session):
     mock_session.assert_not_called()
 
 
+@mock.patch("igwn_auth_utils.requests.Session")
+def test_get_kwargs(mock_session):
+    """Test that `igwn_auth_utils.requests.get` passes `force_noauth` properly.
+
+    Regression: <https://git.ligo.org/computing/igwn-auth-utils/-/issues/12>
+    """
+    assert igwn_requests.get("https://test.org", force_noauth=True)
+    mock_session.assert_called_once_with(
+        url="https://test.org",
+        force_noauth=True,
+    )
+
+
 def test_post(requests_mock):
     """Test that `igwn_auth_utils.requests.post` can perform a simple request.
     """
