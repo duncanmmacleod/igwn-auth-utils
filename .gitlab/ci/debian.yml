@@ -12,13 +12,6 @@ include:
 
 # -- macros
 
-.buster:
-  image: igwn/base:buster
-
-.buster-build:
-  extends: .buster
-  image: igwn/builder:buster
-
 .bullseye:
   image: igwn/base:bullseye
 
@@ -61,11 +54,6 @@ include:
     # repack the tarball
     - tar -zcf ${TARBALL} */
 
-dsc:buster:
-  extends:
-    - .dsc
-    - .buster-build
-
 dsc:bullseye:
   extends:
     - .dsc
@@ -90,13 +78,6 @@ dsc:bookworm:
   stage: Binary packages
   variables:
     DSC: "igwn-auth-utils_*.dsc"
-
-deb:buster:
-  extends:
-    - .deb
-    - .buster-build
-  needs:
-    - dsc:buster
 
 deb:bullseye:
   extends:
@@ -146,14 +127,6 @@ deb:bookworm:
           python3-pytest-cov
           python3-requests-mock
 
-test:buster:
-  extends:
-    - .test:debian
-    - .buster
-  image: igwn/base:buster
-  needs:
-    - deb:buster
-
 test:bullseye:
   extends:
     - .test:debian
@@ -183,15 +156,6 @@ test:bookworm:
   stage: Code quality
   variables:
     LINTIAN_OPTIONS: "--color always --suppress-tags new-package-should-close-itp-bug,groff-message --fail-on warning --allow-root --pedantic"
-
-lintian:buster:
-  extends:
-    - .lintian
-    - .buster
-  needs:
-    - deb:buster
-  variables:
-    LINTIAN_OPTIONS: "--color always --suppress-tags new-package-should-close-itp-bug,latest-debian-changelog-entry-without-new-version --fail-on-warnings --allow-root --pedantic"
 
 lintian:bullseye:
   extends:
