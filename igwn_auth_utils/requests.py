@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# Copyright 2021-2022 Cardiff University
+# Copyright 2021-2023 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
-"""Python Requests interface with IGWN authentication
+"""Python Requests interface with IGWN authentication.
 
 This is heavily inspired by Leo Singer's excellent
 :mod:`requests_gracedb` package.
@@ -11,11 +11,13 @@ This is heavily inspired by Leo Singer's excellent
 __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 __credits__ = "Leo Singer <leo.singer@ligo.org>"
 
-from urllib.parse import urlparse
-
-from safe_netrc import netrc
+import sys
+from functools import wraps
+from unittest import mock
 
 import requests
+from requests.auth import AuthBase as _AuthBase
+from requests import utils as requests_utils
 
 from scitokens import SciToken
 
@@ -28,6 +30,203 @@ from .scitokens import (
 from .x509 import (
     find_credentials as find_x509_credentials,
 )
+
+
+# -- Auth utilities -------------------
+
+
+def _find_cred(func, *args, error=True, **kwargs):
+    """Find a credential and maybe ignore an `~igwn_auth_utils.IgwnAuthError`
+
+    This is an internal utility for the `SessionAuthMixin._init_auth`
+    method which shouldn't necessary fail if it doesn't
+    find a credential of any one type, but should just move on to the
+    next option.
+    """
+    try:
+        return func(*args, **kwargs)
+    except IgwnAuthError:
+        if error:
+            raise
+        return
+
+
+@wraps(requests_utils.get_netrc_auth)
+def get_netrc_auth(url, raise_errors=False):
+    """Wrapper around `requests.utils.get_netrc_auth` to use `safe_netrc`.
+    """
+    import safe_netrc
+    with mock.patch.dict(sys.modules, {"netrc": safe_netrc}):
+        return requests_utils.get_netrc_auth(url, raise_errors=raise_errors)
+
+
+class HTTPSciTokenAuth(_AuthBase):
+    """Auth handler for SciTokens.
+    """
+    def __init__(
+        self,
+        token=None,
+        audience=None,
+        scope=None,
+        issuer=None,
+    ):
+        self.token = token
+        self.audience = audience
+        self.scope = scope
+        self.issuer = issuer
+
+    def __eq__(self, other):
+        return all([
+            self.token == getattr(other, "token", None),
+            self.audience == getattr(other, "audience", None),
+            self.scope == getattr(other, "scope", None),
+            self.issuer == getattr(other, "issuer", None),
+        ])
+
+    def __ne__(self, other):
+        return not self == other
+
+    @staticmethod
+    def _auth_header_str(token):
+        """Serialise a `scitokens.SciToken` and format an Authorization header.
+
+        Parameters
+        ----------
+        token : `scitokens.SciToken`, `str`, `bytes`
+            the token to serialize, or an already serialized representation
+        """
+        if isinstance(token, (str, bytes)):  # already serialised
+            return f"Bearer {token}"
+        return scitoken_authorization_header(token)
+
+    def find_token(
+        self,
+        url=None,
+        error=True,
+    ):
+        """Find a bearer token for authorization.
+
+        Parameters
+        ----------
+        url : `str`
+            The URL that will be queried.
+
+        error : `bool`
+            If `True`, `raise` exceptions, otherwise return `None`.
+        """
+        audience = self.audience
+        if audience is None and url is not None:
+            audience = scitoken_audience(url, include_any=False)
+        return _find_cred(
+            find_scitoken,
+            audience,
+            self.scope,
+            issuer=self.issuer,
+            error=error,
+        )
+
+    def __call__(self, r):
+        """Augment the `Request` ``r`` with an ``Authorization`` header.
+        """
+        token = self.token
+        if token in (None, True):
+            token = self.find_token(
+                url=getattr(r, "url", None),  # allow r as Session
+                error=bool(token),
+            )
+
+        # if we ended up with a header, store it in the request.
+        if token:
+            r.headers["Authorization"] = self._auth_header_str(token)
+
+        return r
+
+
+def _prepare_auth(
+    url=None,
+    auth=None,
+    cert=None,
+    token=None,
+    token_audience=None,
+    token_scope=None,
+    token_issuer=None,
+    force_noauth=False,
+    fail_if_noauth=False,
+    session=None,
+):
+    """Prepare authorisation for a session or request.
+    """
+    # merge settings from the session
+    if session:
+        if cert is None:
+            cert = session.cert
+        if token is None and session.auth is None:
+            token = False
+        if isinstance(session.auth, HTTPSciTokenAuth):
+            if token is None:
+                token = session.auth.token
+            if token_audience is None:
+                token_audience = session.auth.audience
+            if token_scope is None:
+                token_scope = session.auth.scope
+            if token_issuer is None:
+                token_issuer = session.auth.issuer
+
+    # handle options
+    if force_noauth and fail_if_noauth:
+        raise ValueError(
+            "cannot select both force_noauth and fail_if_noauth",
+        )
+    if force_noauth:
+        return None, False
+
+    # cert auth (always attach if we can)
+    if cert in (None, True):  # not disabled and not given explicitly
+        cert = _find_cred(find_x509_credentials, error=cert is True)
+
+    # use existing auth object
+    if auth is not None:
+        pass
+
+    # -- bearer token (scitoken)
+
+    elif token is not False:
+        # get the default audience from the URL
+        if token_audience is None and url is not None:
+            token_audience = scitoken_audience(url, include_any=False)
+        auth = HTTPSciTokenAuth(
+            token=token,
+            audience=token_audience,
+            scope=token_scope,
+            issuer=token_issuer,
+        )
+
+    # -- basic auth (netrc)
+
+    elif (
+        # we know where the requests are heading
+        url is not None
+        # and basic auth not disabled
+        and auth in (None, True)
+    ):
+        auth = get_netrc_auth(url, raise_errors=False)
+
+    # -- handle fail_if_noauth
+
+    # if no auth was found, and we need it, fail here
+    if fail_if_noauth and cert in (None, False) and (
+        auth is None
+        or (
+            isinstance(auth, HTTPSciTokenAuth)
+            and not auth.find_token(url=url, error=False)
+        )
+    ):
+        raise IgwnAuthError("no valid authorisation credentials found")
+
+    return auth, cert
+
+
+# -- Session handling -----------------
 
 _auth_session_parameters = """
     Discovery/configuration of authorisation/authentication methods
@@ -64,8 +263,10 @@ _auth_session_parameters = """
     5.  if none of the above yield a credential, and ``fail_if_noauth=True``
         was provided, raise a `ValueError`.
 
-    Steps 2-4 are all tried independently, with all valid credentials
+    Steps 2 and 3 are all tried independently, with all valid credentials
     (one per type) configured for the session.
+    Only when SciTokens are disabled (``token=False``), will step 4 will be
+    tried to configure basic username/password auth.
     It is up to the request receiver to handle the multiple credential
     types and prioritise between them.
 
@@ -89,7 +290,12 @@ _auth_session_parameters = """
         available tokens.
 
     token_scope : `str`
-        The value(s) of the ``scope``  ``audience`` and ``scope`` to pass to
+        The value(s) of the ``scope`` to pass to
+        :func:`igwn_auth_utils.find_scitoken` when discovering
+        available tokens.
+
+    token_issuer : `str`
+        The value of the issuer (``iss``) claim to pass to
         :func:`igwn_auth_utils.find_scitoken` when discovering
         available tokens.
 
@@ -107,7 +313,9 @@ _auth_session_parameters = """
 
     auth :  `tuple`, `object`, optional
         ``(username, password)`` `tuple` or other authentication/authorization
-        object to attach to a `~requests.Request`
+        object to attach to a `~requests.Request`.
+        By default a new :class:`HTTPSciTokenAuth` handler will be attached
+        to configure ``Authorization`` headers for each request.
 
     url : `str`, optional
         the URL/host that will be queried within this session; this is used
@@ -145,22 +353,6 @@ _auth_session_parameters = """
     igwn_auth_utils.find_x509_credentials
         for details of the X.509 credential discovery
     """.strip()
-
-
-def _find_cred(func, *args, error=True, **kwargs):
-    """Find a credential and maybe ignore an `~igwn_auth_utils.IgwnAuthError`
-
-    This is an internal utility for the `SessionAuthMixin._init_auth`
-    method which shouldn't necessary fail if it doesn't
-    find a credential of any one type, but should just move on to the
-    next option.
-    """
-    try:
-        return func(*args, **kwargs)
-    except IgwnAuthError:
-        if error:
-            raise
-        return
 
 
 def _hook_raise_for_status(response, *args, **kwargs):
@@ -202,6 +394,7 @@ class SessionAuthMixin:
         token=None,
         token_audience=None,
         token_scope=None,
+        token_issuer=None,
         cert=None,
         auth=None,
         url=None,
@@ -209,119 +402,42 @@ class SessionAuthMixin:
         fail_if_noauth=False,
         **kwargs,
     ):
-        # initialise session and new attributes
+        # initialise session
         super().__init__(**kwargs)
 
-        #: The SciToken object to be serialised and sent with all requests,
-        #: this is only populated if a `~scitokens.SciToken` object is
-        #: passed directly, or discovered automatically (i.e. a serialised
-        #: token will not be deserialized and stored).
-        self.token = None
-
-        # handle options
-        if force_noauth and fail_if_noauth:
-            raise ValueError(
-                "cannot select both force_noauth and fail_if_noauth",
-            )
-        if force_noauth:
-            return
-
-        # find creds if we can
-        _auth = self._init_auth(
+        # initialise auth handler and cert
+        self._init_auth(
+            url=url,
             auth=auth,
             cert=cert,
             token=token,
             token_audience=token_audience,
             token_scope=token_scope,
-            url=url,
+            token_issuer=token_issuer,
+            force_noauth=force_noauth,
+            fail_if_noauth=fail_if_noauth,
         )
 
-        # if no auth was found, and we need it, fail here
-        if not _auth and fail_if_noauth:
-            raise IgwnAuthError("no valid authorisation credentials found")
+    def _init_auth(self, url=None, token=None, **kwargs):
+        """Initialise the auth handler for this `Session`.
+        """
+        # find creds if we can
+        self.auth, self.cert = _prepare_auth(url=url, token=token, **kwargs)
 
-    def _init_auth(
-        self,
-        auth=None,
-        cert=None,
-        token=None,
-        token_audience=None,
-        token_scope=None,
-        url=None,
-    ):
-        # bearer token (scitoken)
-        if token in (None, True):
-            token = self._find_token(
-                token_audience,
-                token_scope,
-                url=url,
-                error=bool(token),
-            )
+        # if we were given a token, use it now
+        if isinstance(token, (SciToken, str, bytes)):
+            self.auth(self)
+
+    @property
+    def token(self):
+        """The token object that will be used in authorised requests.
+
+        If the :attr:`Session.auth` property isn't an instance of
+        `HTTPSciTokenAuth` with a token attached, this returns `None`.
+        """
+        token = getattr(self.auth, "token", None)
         if isinstance(token, SciToken):
-            self.token = token
-        if token:
-            token = self._set_token_header(token)
-
-        # cert auth
-        if cert in (None, True):  # not disabled and not given explicitly
-            cert = self._find_x509_credentials(error=bool(cert))
-        if cert:
-            self.cert = cert
-
-        # basic auth (netrc)
-        if auth in (None, True):  # not disabled and not given explicitly
-            auth = self._find_username_password(url)
-        if auth:
-            self.auth = auth
-
-        return token or self.cert or self.auth
-
-    def _set_token_header(self, token):
-        """Serialise a `scitokens.SciToken` and format and store as an
-        Authorization header for this session.
-
-        Parameters
-        ----------
-        token : `scitokens.SciToken`, `str`, `bytes`
-            the token to serialize, or an already serialized representation
-        """
-        if isinstance(token, (str, bytes)):  # load a valid token
-            header = f"Bearer {token}"
-        else:
-            header = scitoken_authorization_header(token)
-        self.headers["Authorization"] = header
-        return header
-
-    @staticmethod
-    def _find_x509_credentials(error=True):
-        """Find an X.509 certificate for authorization
-        """
-        return _find_cred(find_x509_credentials, error=error)
-
-    @staticmethod
-    def _find_token(audience, scope, url=None, error=True):
-        """Find a bearer token for authorization
-        """
-        if audience is None and url is not None:
-            audience = scitoken_audience(url, include_any=True)
-        return _find_cred(find_scitoken, audience, scope, error=error)
-
-    @staticmethod
-    def _find_username_password(url):
-        """Use `safe_netrc.netrc` to find the username/password for basic auth
-        """
-        host = urlparse(url).hostname
-
-        try:
-            result = netrc().authenticators(host)
-        except IOError:
-            return
-
-        try:
-            username, _, password = result
-        except TypeError:
-            return
-        return username, password
+            return token
 
 
 class Session(
@@ -329,7 +445,7 @@ class Session(
     SessionErrorMixin,
     requests.Session,
 ):
-    """`requests.Session` class with default IGWN authorization handling
+    """`requests.Session` class with default IGWN authorization handling.
 
     {parameters}
 
@@ -367,11 +483,53 @@ class Session(
         "token",
     ]
 
+    @wraps(requests.Session.request)
+    def request(
+        self,
+        method,
+        url,
+        *args,
+        token=None,
+        token_audience=None,
+        token_scope=None,
+        token_issuer=None,
+        cert=None,
+        auth=None,
+        force_noauth=False,
+        fail_if_noauth=False,
+        **kwargs,
+    ):
+        # handle request-specific auth
+        auth, cert = _prepare_auth(
+            url=url,
+            auth=auth,
+            cert=cert,
+            token=token,
+            token_audience=token_audience,
+            token_scope=token_scope,
+            token_issuer=token_issuer,
+            force_noauth=force_noauth,
+            fail_if_noauth=fail_if_noauth,
+            session=self,
+        )
+
+        # continue with request
+        return super().request(
+            method,
+            url,
+            *args,
+            auth=auth,
+            cert=cert,
+            **kwargs,
+        )
+
 
 # update the docstrings to include the same parameter info
 for _obj in (Session, SessionAuthMixin):
     _obj.__doc__ = _obj.__doc__.format(parameters=_auth_session_parameters)
 
+
+# -- standalone request handling ------
 
 def request(method, url, *args, session=None, **kwargs):
     """Send a request of the specific method to the specified URL.
@@ -399,7 +557,7 @@ def request(method, url, *args, session=None, **kwargs):
 
     See also
     --------
-    requests.Session.request
+    igwn_auth_utils.requests.Session.request
         for information on how the request is performed
     """
     # user's session
@@ -407,18 +565,7 @@ def request(method, url, *args, session=None, **kwargs):
         return session.request(method, url, *args, **kwargs)
 
     # new session
-    sess_kwargs = {
-        k: kwargs.pop(k) for k in (
-            "token",
-            "token_audience",
-            "token_scope",
-            "cert",
-            "auth",
-            "force_noauth",
-            "fail_if_noauth",
-        ) if k in kwargs
-    }
-    with Session(url=url, **sess_kwargs) as session:
+    with Session(force_noauth=kwargs.get("force_noauth", False)) as session:
         return session.request(method, url, *args, **kwargs)
 
 
@@ -451,6 +598,9 @@ _request_wrapper_doc = """
 
 
 def _request_wrapper_factory(method):
+    """Factor function to wrap a :mod:`requests` HTTP method to use
+    our request function.
+    """
     def _request_wrapper(url, *args, session=None, **kwargs):
         return request(method, url, *args, session=session, **kwargs)
 

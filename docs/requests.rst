@@ -41,12 +41,13 @@ API
 
    ~igwn_auth_utils.get
    ~igwn_auth_utils.request
+   ~igwn_auth_utils.HTTPSciTokenAuth
    ~igwn_auth_utils.Session
    ~igwn_auth_utils.SessionAuthMixin
 
-======================
-Other request methoeds
-======================
+=====================
+Other request methods
+=====================
 
 Only the :func:`~igwn_auth_utils.get` and :func:`~igwn_auth_utils.request`
 functions are available from the top-level module interface, however all
