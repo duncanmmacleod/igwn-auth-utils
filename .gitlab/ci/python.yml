@@ -68,3 +68,8 @@ test:python3.10:
   extends:
     - .test:pip
   image: python:3.10
+
+test:python3.11:
+  extends:
+    - .test:pip
+  image: python:3.11
