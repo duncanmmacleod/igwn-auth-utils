@@ -10,6 +10,7 @@ from .error import IgwnAuthError
 from .requests import (
     get,
     request,
+    HTTPSciTokenAuth,
     Session,
     SessionAuthMixin,
     SessionErrorMixin,
