@@ -31,9 +31,12 @@ from .x509 import (
     find_credentials as find_x509_credentials,
 )
 
+# handle https://github.com/psf/requests/issues/4025
+# NOTE: 2.14.1 is the base version on EPEL7
+REQUESTS_CERT_HTTP_BUG = '2.14.1' <= requests.__version__ < '2.15.0'
+
 
 # -- Auth utilities -------------------
-
 
 def _find_cred(func, *args, error=True, **kwargs):
     """Find a credential and maybe ignore an `~igwn_auth_utils.IgwnAuthError`
@@ -156,6 +159,14 @@ def _prepare_auth(
 ):
     """Prepare authorisation for a session or request.
     """
+    # workaround https://github.com/psf/requests/issues/4025
+    if (
+        cert is None
+        and str(url).startswith("http://")
+        and REQUESTS_CERT_HTTP_BUG
+    ):
+        cert = False
+
     # merge settings from the session
     if session:
         if cert is None:
