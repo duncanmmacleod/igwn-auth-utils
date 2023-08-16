@@ -16,11 +16,19 @@ from urllib.parse import urlencode
 
 import pytest
 
-from requests import RequestException
+from requests import (
+    __version__ as requests_version,
+    RequestException,
+)
 
 from .. import requests as igwn_requests
 from ..error import IgwnAuthError
 from .test_scitokens import rtoken  # noqa: F401
+
+SKIP_REQUESTS_NETRC = pytest.mark.skipif(
+    requests_version < "2.25.0",
+    reason=f"requests {requests_version} doesn't respect NETRC env",
+)
 
 
 # -- utilities ------------------------
@@ -74,6 +82,7 @@ class MockRequest(mock.MagicMock):
 # -- get_netrc_auth -------------------
 
 @mock.patch.dict(os.environ)
+@SKIP_REQUESTS_NETRC
 def test_get_netrc_auth(netrc):
     os.environ["NETRC"] = str(netrc)
     assert igwn_requests.get_netrc_auth("https://example.org/path") == (
@@ -83,12 +92,14 @@ def test_get_netrc_auth(netrc):
 
 
 @mock.patch.dict(os.environ)
+@SKIP_REQUESTS_NETRC
 def test_get_netrc_auth_nomatch(netrc):
     os.environ["NETRC"] = str(netrc)
     assert igwn_requests.get_netrc_auth("https://bad.org/path") is None
 
 
 @mock.patch.dict(os.environ)
+@SKIP_REQUESTS_NETRC
 def test_get_netrc_auth_notfound(tmp_path):
     netrc_file = tmp_path / "netrc"
     os.environ["NETRC"] = str(netrc_file)
@@ -101,6 +112,7 @@ def test_get_netrc_auth_notfound(tmp_path):
     os.name == "nt",
     reason="safe_netrc doesn't do anything on Windows",
 )
+@SKIP_REQUESTS_NETRC
 def test_get_netrc_auth_permissions(netrc):
     os.environ["NETRC"] = str(netrc)
     netrc.chmod(0o444)
@@ -304,6 +316,7 @@ class TestSession:
         ("https://example.org", ("albert.einstein", "super-secret")),
         ("https://bad.org", None),
     ))
+    @SKIP_REQUESTS_NETRC
     def test_basic_auth(self, netrc, url, auth):
         os.environ["NETRC"] = str(netrc)
         sess = self.Session(cert=False, token=False, url=url)

@@ -129,27 +129,33 @@ rpm:el9:
     - !reference [".rhel:base", before_script]
     # configure EPEL
     - yum -y -q install epel-release && yum -y -q install epel-rpm-macros
-    # install testing dependencies
-    - PY3=$(rpm --eval '%{?python3_pkgversion:%{python3_pkgversion}}%{!?python3_pkgversion:3}')
-    - yum -y -q install
-          findutils
-          python${PY3}-coverage
     # install our package(s)
     - yum -y -q install *.rpm
-  script:
-    # the test suite requires packages that are too new to be handled
-    # by RHEL7 or RHEL8, so we can't test much here
-    - |
-      cat > test.py << EOF
-      from igwn_auth_utils import (x509, scitokens)
-      EOF
-    - python3 -m coverage run
-          --source=igwn_auth_utils
-          --omit=*/_version.py
-          test.py
-  artifacts:
-    reports:
-      junit: null
+    # install testing dependencies
+    - PY3=$(rpm --eval '%{?python3_pkgversion:%{python3_pkgversion}}%{!?python3_pkgversion:3}')
+    - if [[ "${CI_JOB_NAME}" == *"el7" ]]; then
+      yum -y -q install
+          findutils
+          python${PY3}-coverage
+          python${PY3}-pip
+          python${PY3}-pytest
+          python${PY3}-pytest-cov;
+      /usr/bin/python3 -m pip install requests-mock
+      ; else
+      dnf -y -q install
+          findutils
+          python${PY3}-coverage
+          python${PY3}-pytest
+          python${PY3}-pytest-cov
+          python${PY3}-requests-mock
+      ; fi
+    # install up-to-date pytest (RL<9)
+    - if [[ "${CI_JOB_NAME}" == *"el7" ]] || [[ "${CI_JOB_NAME}" == *"el8" ]]; then
+      yum install -y -q python${PY3}-pip &&
+      /usr/bin/python3 -m pip install "pytest==3.9.1";
+      fi
+    # list installed packages
+    - yum list installed
 
 test:el7:
   extends:

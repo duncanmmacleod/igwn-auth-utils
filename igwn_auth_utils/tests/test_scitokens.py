@@ -145,6 +145,7 @@ def test_is_valid_token_invalid_path(rtoken):
 def test_is_valid_token_serialized(rtoken, public_pem):
     _deserialize_local = partial(
         SciToken.deserialize,
+        audience=READ_AUDIENCE,
         insecure=True,
         public_key=public_pem,
     )
@@ -285,7 +286,7 @@ def test_find_token_condor_creds(
     (READ_AUDIENCE, "could not find a valid SciToken"),
     (WRITE_AUDIENCE, (
         "could not find a valid SciToken" if scitokens_version >= "1.7.3"
-        else "Invalid audience"
+        else "(Invalid audience|Audience doesn't match)"
     )),
 ])
 @mock.patch.dict("os.environ")
