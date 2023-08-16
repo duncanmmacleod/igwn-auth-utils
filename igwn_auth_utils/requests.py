@@ -575,8 +575,22 @@ def request(method, url, *args, session=None, **kwargs):
     if session:
         return session.request(method, url, *args, **kwargs)
 
+    # give the Session constructor everything for auth as well
+    session_kw = {
+        k: kwargs[k] for k in (
+            "auth",
+            "cert",
+            "fail_if_noauth",
+            "force_noauth",
+            "token",
+            "token_audience",
+            "token_issuer",
+            "token_scope",
+        ) if k in kwargs
+    }
+
     # new session
-    with Session(force_noauth=kwargs.get("force_noauth", False)) as session:
+    with Session(url=url, **session_kw) as session:
         return session.request(method, url, *args, **kwargs)
 
 
