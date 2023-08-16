@@ -152,8 +152,11 @@ rpm:el9:
     # install up-to-date pytest (RL<9)
     - if [[ "${CI_JOB_NAME}" == *"el7" ]] || [[ "${CI_JOB_NAME}" == *"el8" ]]; then
       yum install -y -q python${PY3}-pip &&
-      /usr/bin/python3 -m pip install "pytest==3.9.1";
-      fi
+      /usr/bin/python3 -m pip install
+        --upgrade-strategy=only-if-needed
+        "pytest==3.9.1"
+        "coverage>=5"
+      ; fi
     # list installed packages
     - yum list installed
 
