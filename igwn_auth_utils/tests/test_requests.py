@@ -461,6 +461,19 @@ def test_get(requests_mock):
     assert igwn_requests.get("https://test.org").text == "TEST"
 
 
+@mock.patch("igwn_auth_utils.requests.HTTPSciTokenAuth.__call__")
+def test_get_token_false(token_auth_call, requests_mock):
+    """Test that `igwn_auth_utils.requests.get` respects token=False.
+    """
+    requests_mock.get(
+        "https://test.org",
+        text="TEST",
+    )
+    igwn_requests.get("https://test.org", token=False)
+    # assert that HTTPSciTokenAuth is never actually invoked
+    token_auth_call.assert_not_called()
+
+
 @mock.patch("igwn_auth_utils.requests.Session")
 def test_get_session(mock_session):
     """Test that ``session`` for `igwn_auth_utils.requests.get` works
