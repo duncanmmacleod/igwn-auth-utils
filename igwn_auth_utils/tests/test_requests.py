@@ -301,6 +301,16 @@ class TestSession:
         """
         assert self.Session(token=False).cert == "test.pem"
 
+    @pytest.mark.skipif(
+        not igwn_requests.REQUESTS_CERT_HTTP_BUG,
+        reason=f"bug not present on requests {requests_version}",
+    )
+    def test_cert_requests_214(self):
+        """Test that cert is disabled on requests 2.14 by default.
+        """
+        s = self.Session(url="http://example.com")
+        assert s.cert is False
+
     @mock.patch(
         "igwn_auth_utils.requests.find_x509_credentials",
         side_effect=IgwnAuthError,

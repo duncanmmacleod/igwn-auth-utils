@@ -20,6 +20,9 @@ docs:
   extends:
     # https://computing.docs.ligo.org/gitlab-ci-templates/python/#.python:sphinx
     - .python:sphinx
+  tags:
+    # run docs at UWM to avoid SSLError from fonts.googleapis.com
+    - uwm
   rules:
     # production build (uses directory URLs which look nice)
     - if: '$CI_PROJECT_NAMESPACE == "computing" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
