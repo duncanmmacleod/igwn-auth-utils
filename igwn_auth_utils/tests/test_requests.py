@@ -448,6 +448,24 @@ class TestSession:
                 fail_if_noauth=True,
             )
 
+    @mock.patch("igwn_auth_utils.requests.HTTPSciTokenAuth.__call__")
+    def test_request_token_false(self, token_auth_call, requests_mock):
+        """Test that token=False on the request is respected.
+
+        Regression: https://git.ligo.org/computing/igwn-auth-utils/-/issues/14
+        """
+        requests_mock.get("https://example.com/api")
+        with self.Session(cert=False, raise_for_status=False) as sess:
+            assert isinstance(sess.auth, igwn_requests.HTTPSciTokenAuth)
+            sess.get("https://example.com/api", token=False)
+            # assert that token=False is propagated properly
+            # so that HTTPSciTokenAuth is never actually invoked
+            token_auth_call.assert_not_called()
+
+            # check that if we want a token the next time, it gets used
+            sess.get("https://example.com/api")
+            token_auth_call.assert_called_once()
+
 
 # -- standalone requests --------------
 
