@@ -1,5 +1,5 @@
 %define srcname igwn-auth-utils
-%define version 1.0.1
+%define version 1.0.2
 %define release 1
 
 Name:      python-%{srcname}
@@ -75,6 +75,9 @@ rm -rf $RPM_BUILD_ROOT
 # -- changelog
 
 %changelog
+* Thu Aug 24 2023 Duncan Macleod <duncan.macleod@ligo.org> - 1.0.2-1
+- update to 1.0.2
+
 * Wed Aug 16 2023 Duncan Macleod <duncan.macleod@ligo.org> - 1.0.1-1
 - update to 1.0.1
 
