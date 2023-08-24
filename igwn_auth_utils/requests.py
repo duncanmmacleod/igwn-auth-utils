@@ -222,11 +222,24 @@ def _prepare_auth(
     ):
         auth = get_netrc_auth(url, raise_errors=False)
 
+    # -- handle session/request auth combination
+
+    if (
+        # if the parent Session is configured for token auth
+        session is not None and isinstance(session.auth, HTTPSciTokenAuth)
+        # but _this request_ came with token=False
+        and token is False
+        # and didn't get configured for any other auth
+        and auth is None
+    ):
+        # we need to forcibly disable using the session's token auth
+        auth = False
+
     # -- handle fail_if_noauth
 
     # if no auth was found, and we need it, fail here
     if fail_if_noauth and cert in (None, False) and (
-        auth is None
+        not auth
         or (
             isinstance(auth, HTTPSciTokenAuth)
             and not auth.find_token(url=url, error=False)
