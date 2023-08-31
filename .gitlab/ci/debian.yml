@@ -155,7 +155,7 @@ test:bookworm:
     - .debian:lint
   stage: Code quality
   variables:
-    LINTIAN_OPTIONS: "--color always --suppress-tags new-package-should-close-itp-bug,groff-message --fail-on warning --allow-root --pedantic"
+    LINTIAN_OPTIONS: "--color always --suppress-tags new-package-should-close-itp-bug,groff-message --fail-on warning,error --allow-root --pedantic"
 
 lintian:bullseye:
   extends:
