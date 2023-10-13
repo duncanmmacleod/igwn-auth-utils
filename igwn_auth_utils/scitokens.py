@@ -52,8 +52,8 @@ def is_valid_token(
     audience : `str`, `list` or `str`
         The audience(s) to accept.
 
-    scope : `str`
-        A single scope to enforce.
+    scope : `str`, `list`
+        One or more scopes to enforce.
 
     timeleft : `float`
         The amount of time remaining (in seconds, from the `exp` claim)
@@ -89,16 +89,24 @@ def is_valid_token(
 
     # if scope wasn't given, borrow one from the token to pass validation
     if scope is None:
-        scope = token["scope"].split(" ", 1)[0]
-    # parse scope as scheme:path
-    try:
-        authz, path = scope.split(":", 1)
-    except ValueError:
-        authz = scope
-        path = None
+        scope = token["scope"].split(" ", 1)[:1]
 
-    # test
-    return enforcer.test(token, authz, path=path)
+    # iterate over given scopes and test all of them
+    if isinstance(scope, str):
+        scope = scope.split(" ")
+    for scp in scope:
+        # parse scope as scheme:path
+        try:
+            authz, path = scp.split(":", 1)
+        except ValueError:
+            authz = scp
+            path = None
+
+        # test
+        if not enforcer.test(token, authz, path=path):
+            return False
+
+    return True
 
 
 def target_audience(url, include_any=True):
