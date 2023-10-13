@@ -85,6 +85,15 @@ def wtoken(private_key):
 
 
 @pytest.fixture
+def rwtoken(private_key):
+    return _create_token(
+        key=private_key,
+        aud=READ_AUDIENCE,
+        scope=" ".join((READ_SCOPE, WRITE_SCOPE)),
+    )
+
+
+@pytest.fixture
 def rtoken_path(rtoken, tmp_path):
     token_path = tmp_path / "token.use"
     _write_token(rtoken, token_path)
@@ -132,6 +141,21 @@ def _assert_claims_equal(a, b):
 def test_is_valid_token(rtoken, scope, validity):
     assert igwn_scitokens.is_valid_token(
         rtoken,
+        READ_AUDIENCE,
+        scope,
+    ) is validity
+
+
+@pytest.mark.parametrize(("scope", "validity"), [
+    (READ_SCOPE, True),
+    (WRITE_SCOPE, True),
+    ([READ_SCOPE, WRITE_SCOPE], True),
+    ("other", False),  # single scope, no match
+    ([READ_SCOPE, "other"], False),  # partial match
+])
+def test_is_valid_token_multiple_scopes(rwtoken, scope, validity):
+    assert igwn_scitokens.is_valid_token(
+        rwtoken,
         READ_AUDIENCE,
         scope,
     ) is validity
