@@ -5,6 +5,11 @@ include:
     inputs:
       install_extra: "test"
       run_advanced_sast: true
+      python_versions:
+        - "3.9"
+        - "3.10"
+        - "3.11"
+        - "3.12"
 
   # -- Debian packaging --------------
 
