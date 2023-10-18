@@ -7,11 +7,8 @@
 
 __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 
+import datetime
 import os
-from datetime import (
-    datetime,
-    timedelta,
-)
 from pathlib import Path
 from unittest import mock
 
@@ -36,14 +33,17 @@ def x509cert(private_key, public_key):
     name = x509.Name([
         x509.NameAttribute(NameOID.COMMON_NAME, "test"),
     ])
-    now = datetime.utcnow()
+    try:
+        now = datetime.datetime.now(datetime.UTC)
+    except AttributeError:  # python < 3.11
+        now = datetime.datetime.utcnow()
     return x509.CertificateBuilder(
         issuer_name=name,
         subject_name=name,
         public_key=public_key,
         serial_number=1000,
         not_valid_before=now,
-        not_valid_after=now + timedelta(seconds=86400),
+        not_valid_after=now + datetime.timedelta(seconds=86400),
     ).sign(private_key, hashes.SHA256(), backend=default_backend())
 
 
