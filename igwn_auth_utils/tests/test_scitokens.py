@@ -206,6 +206,24 @@ def test_is_valid_token_issuer(rtoken, issuer, result):
     ) is result
 
 
+def test_is_valid_token_invalidauthorizationresources(private_key):
+    """Check that `is_valid` doesn't fall over tokens with invalid scopes.
+
+    Regression test for
+    <https://git.ligo.org/computing/igwn-auth-utils/-/issues/15>.
+    """
+    token = _create_token(
+        key=private_key,
+        scope=" ".join(["test.auth:relative_path", READ_SCOPE])
+    )
+    assert not igwn_scitokens.is_valid_token(
+        token,
+        token["aud"],
+        READ_SCOPE,
+        timeleft=-1e9,
+    )
+
+
 @pytest.mark.parametrize("include_any", (False, True))
 @pytest.mark.parametrize(("url", "aud"), (
     # basic
