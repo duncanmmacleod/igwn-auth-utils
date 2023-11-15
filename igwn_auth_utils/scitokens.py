@@ -20,6 +20,7 @@ from scitokens import (
     SciToken,
 )
 from scitokens.utils.errors import SciTokensException
+from scitokens.scitokens import InvalidAuthorizationResource
 
 from .error import IgwnAuthError
 
@@ -103,7 +104,12 @@ def is_valid_token(
             path = None
 
         # test
-        if not enforcer.test(token, authz, path=path):
+        try:
+            res = enforcer.test(token, authz, path=path)
+        except InvalidAuthorizationResource:
+            # bad scope in the token, is invalid
+            return False
+        if not res:
             return False
 
     return True
