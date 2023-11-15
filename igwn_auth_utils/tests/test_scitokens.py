@@ -224,6 +224,22 @@ def test_is_valid_token_invalidauthorizationresources(private_key):
     )
 
 
+def test_is_valid_token_warn(rtoken):
+    """Check that `is_valid_token` emits warnings when asked.
+    """
+    with pytest.warns(
+        UserWarning,
+        match=f"Validator rejected value of '{rtoken['iss']}' for claim 'iss'",
+    ):
+        assert igwn_scitokens.is_valid_token(
+            rtoken,
+            READ_AUDIENCE,
+            None,
+            issuer="something else",
+            warn=True,
+        ) is False
+
+
 @pytest.mark.parametrize("include_any", (False, True))
 @pytest.mark.parametrize(("url", "aud"), (
     # basic
@@ -374,6 +390,27 @@ def test_find_token_skip_errors(rtoken, skip_errors, message):
             READ_AUDIENCE,
             READ_SCOPE,
             skip_errors=skip_errors,
+        )
+
+
+@mock.patch.dict("os.environ")
+def test_find_token_warn(rtoken, rtoken_path, public_pem):
+    os.environ["SCITOKEN"] = "blah"
+    os.environ["SCITOKEN_FILE"] = str(rtoken_path)
+    with pytest.warns(
+        UserWarning,
+        match="InvalidTokenFormat",
+    ):
+        assert_tokens_equal(
+            igwn_scitokens.find_token(
+                audience=READ_AUDIENCE,
+                scope=READ_SCOPE,
+                insecure=True,
+                public_key=public_pem,
+                skip_errors=True,
+                warn=True,
+            ),
+            rtoken,
         )
 
 
