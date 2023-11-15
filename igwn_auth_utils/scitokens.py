@@ -8,6 +8,7 @@
 __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 
 import os
+import warnings
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -42,6 +43,7 @@ def is_valid_token(
     scope,
     issuer=None,
     timeleft=600,
+    warn=False,
 ):
     """Test whether a ``token`` is valid according to the given claims.
 
@@ -62,6 +64,10 @@ def is_valid_token(
 
     issuer : `str`
         The value of the `iss` claim to enforce.
+
+    warn : `bool`
+        If `True`, emit a warning when a token fails the enforcer test,
+        useful in debugging bad tokens.
 
     Returns
     -------
@@ -106,10 +112,15 @@ def is_valid_token(
         # test
         try:
             res = enforcer.test(token, authz, path=path)
-        except InvalidAuthorizationResource:
+        except InvalidAuthorizationResource as exc:
             # bad scope in the token, is invalid
-            return False
+            res = False
+            msg = f"{type(exc).__name__}: {exc}"
+        else:
+            msg = enforcer.last_failure
         if not res:
+            if warn:
+                warnings.warn(msg)
             return False
 
     return True
@@ -226,6 +237,7 @@ def find_token(
     issuer=None,
     timeleft=600,
     skip_errors=True,
+    warn=False,
     **kwargs,
 ):
     """Find and load a `SciToken` for the given ``audience`` and ``scope``.
@@ -250,6 +262,10 @@ def find_token(
         discovered tokens; this may be useful to skip over invalid
         or expired tokens that exist, for example, which is why it
         is the default behaviour.
+
+    warn : `bool`
+        emit a warning when a token fails to deserialize, or fails
+        validation.
 
     kwargs
         all keyword arguments are passed on to
@@ -278,6 +294,8 @@ def find_token(
         # parsing a token yielded an exception, handle it here:
         if isinstance(token, Exception):
             error = error or token  # record (first) error for later
+            if warn:  # emit a warning
+                warnings.warn(f"{type(error).__name__}: {error}")
             if skip_errors:
                 continue  # move on
             raise IgwnAuthError(str(error)) from error  # stop here and raise
@@ -289,6 +307,7 @@ def find_token(
             scope,
             issuer=issuer,
             timeleft=timeleft,
+            warn=warn,
         ):
             return token
 
