@@ -2,8 +2,8 @@
 # Copyright 2021 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
+import datetime
 import os
-from datetime import datetime
 from pathlib import Path
 
 from cryptography.x509 import (
@@ -95,7 +95,14 @@ def is_valid_certificate(cert, timeleft=600):
 def _timeleft(cert):
     """Returns the time remaining (in seconds) for a ``cert``
     """
-    return (cert.not_valid_after - datetime.utcnow()).total_seconds()
+    expiry = cert.not_valid_after
+    try:
+        now = datetime.datetime.now(datetime.UTC)
+    except AttributeError:  # python < 3.11
+        now = datetime.datetime.utcnow()
+    else:
+        expiry = expiry.astimezone(datetime.UTC)
+    return (expiry - now).total_seconds()
 
 
 def _default_cert_path(prefix="x509up_"):
