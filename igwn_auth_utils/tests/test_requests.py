@@ -23,6 +23,7 @@ from requests import (
 
 from .. import requests as igwn_requests
 from ..error import IgwnAuthError
+from ..scitokens import target_audience
 from .test_scitokens import rtoken  # noqa: F401
 
 SKIP_REQUESTS_NETRC = pytest.mark.skipif(
@@ -425,15 +426,25 @@ class TestSession:
             assert sess.auth.audience == session_aud
             assert sess.auth.scope == session_scope
 
+            audience = (
+                request_aud
+                or session_aud
+                or target_audience(
+                    "https://example.com/api",
+                    include_any=False,
+                )
+            )
+
             # but that the request auth uses any new settings we give it
             sess.get(
                 "https://example.com/api",
                 token_audience=request_aud,
                 token_scope=request_scope,
             )
-            assert find_scitoken.called_once_with(
-                audience=request_aud or session_aud,
-                scope=request_scope or session_scope,
+            find_scitoken.assert_called_once_with(
+                audience,
+                request_scope or session_scope,
+                issuer=None,
             )
 
     @mock.patch("igwn_auth_utils.requests.find_scitoken", return_value=None)
