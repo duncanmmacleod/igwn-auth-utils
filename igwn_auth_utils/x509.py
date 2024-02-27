@@ -99,7 +99,7 @@ def _timeleft(cert):
         expiry = cert.not_valid_after_utc
     except AttributeError:
         # cryptography < 42
-        expiry = cert.not_valid_after
+        expiry = cert.not_valid_after.astimezone(datetime.timezone.utc)
     now = datetime.datetime.now(datetime.timezone.utc)
     return (expiry - now).total_seconds()
 
