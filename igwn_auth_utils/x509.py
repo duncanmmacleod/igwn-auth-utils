@@ -95,13 +95,12 @@ def is_valid_certificate(cert, timeleft=600):
 def _timeleft(cert):
     """Returns the time remaining (in seconds) for a ``cert``
     """
-    expiry = cert.not_valid_after
     try:
-        now = datetime.datetime.now(datetime.UTC)
-    except AttributeError:  # python < 3.11
-        now = datetime.datetime.utcnow()
-    else:
-        expiry = expiry.astimezone(datetime.UTC)
+        expiry = cert.not_valid_after_utc
+    except AttributeError:
+        # cryptography < 42
+        expiry = cert.not_valid_after.astimezone(datetime.timezone.utc)
+    now = datetime.datetime.now(datetime.timezone.utc)
     return (expiry - now).total_seconds()
 
 
