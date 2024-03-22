@@ -5,6 +5,8 @@
 include:
   # https://docs.gitlab.com/ee/user/application_security/dependency_scanning/
   - template: Security/Dependency-Scanning.gitlab-ci.yml
+  # https://docs.gitlab.com/ee/user/application_security/sast/
+  - template: Jobs/SAST.gitlab-ci.yml
   # https://computing.docs.ligo.org/gitlab-ci-templates/
   - project: computing/gitlab-ci-templates
     # https://computing.docs.ligo.org/gitlab-ci-templates/python/
@@ -51,6 +53,8 @@ dependency_scanning:
   stage: Code quality
   needs: []
   before_script:
+    # The builtin dependency scanner isn't smart enough to
+    # parse pyproject.toml directly, so we create a requirements.txt.
     - |
       python -c "
       from setuptools import Distribution
@@ -61,3 +65,15 @@ dependency_scanning:
           reqs.extend(dist.extras_require[extra])
       print('\n'.join(reqs))
       " | sort -u > requirements.txt
+
+gemnasium-python-dependency_scanning:
+  rules:
+    # The Python dependency scanner doesn't auto-detect projects that
+    # only use pyproject.toml, so we force the job to run.
+    - if: $CI_COMMIT_BRANCH
+
+# -- SAST -------------------
+
+sast:
+  stage: Code quality
+  needs: []
