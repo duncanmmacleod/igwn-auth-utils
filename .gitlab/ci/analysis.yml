@@ -5,6 +5,8 @@
 include:
   # https://docs.gitlab.com/ee/user/application_security/dependency_scanning/
   - template: Security/Dependency-Scanning.gitlab-ci.yml
+  # https://docs.gitlab.com/ee/user/application_security/sast/
+  - template: Jobs/SAST.gitlab-ci.yml
   # https://computing.docs.ligo.org/gitlab-ci-templates/
   - project: computing/gitlab-ci-templates
     # https://computing.docs.ligo.org/gitlab-ci-templates/python/
@@ -69,3 +71,9 @@ gemnasium-python-dependency_scanning:
     # The Python dependency scanner doesn't auto-detect projects that
     # only use pyproject.toml, so we force the job to run.
     - if: $CI_COMMIT_BRANCH
+
+# -- SAST -------------------
+
+sast:
+  stage: Code quality
+  needs: []
