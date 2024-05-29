@@ -1,4 +1,5 @@
 %define srcname igwn-auth-utils
+%define distname %{lua:name = string.gsub(rpm.expand("%{srcname}"), "-", "_"); print(name)}
 %define version 1.1.0
 %define release 1
 
@@ -9,7 +10,7 @@ Summary:   Authorisation utilities for IGWN
 
 License:   BSD-3-Clause
 Url:       https://igwn-auth-utils.readthedocs.io
-Source0:   %pypi_source
+Source0:   %pypi_source %distname
 
 Packager:  Duncan Macleod <duncan.macleod@ligo.org>
 Vendor:    Duncan Macleod <duncan.macleod@ligo.org>
@@ -51,7 +52,7 @@ SciTokens for use with HTTP(S) requests to IGWN-operated services.
 # -- build steps
 
 %prep
-%autosetup -n %{srcname}-%{version}
+%autosetup -n %{distname}-%{version}
 
 %build
 %py3_build_wheel
