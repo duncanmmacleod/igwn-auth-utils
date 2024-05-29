@@ -18,17 +18,12 @@ Vendor:    Duncan Macleod <duncan.macleod@ligo.org>
 BuildArch: noarch
 Prefix:    %{_prefix}
 
-# rpmbuild dependencies
-BuildRequires: python-srpm-macros
-BuildRequires: python-rpm-macros
-BuildRequires: python3-rpm-macros
-
 # build dependencies
-BuildRequires: python%{python3_pkgversion}-devel
-BuildRequires: python%{python3_pkgversion}-pip
-BuildRequires: python%{python3_pkgversion}-setuptools >= 38.2.5
-BuildRequires: python%{python3_pkgversion}-setuptools_scm
-BuildRequires: python%{python3_pkgversion}-wheel
+BuildRequires: python3-devel >= 3.6
+BuildRequires: python3dist(pip)
+BuildRequires: python3dist(setuptools) >= 38.2.5
+BuildRequires: python3dist(setuptools-scm)
+BuildRequires: python3dist(wheel)
 
 %description
 Python library functions to simplify using IGWN authorisation credentials.
@@ -37,14 +32,13 @@ SciTokens for use with HTTP(S) requests to IGWN-operated services.
 
 # -- python-3X-igwn-auth-utils
 
-%package -n python%{python3_pkgversion}-%{srcname}
-Requires: python%{python3_pkgversion}-cryptography >= 2.3
-Requires: python%{python3_pkgversion}-requests >= 2.14
-Requires: python%{python3_pkgversion}-safe-netrc >= 1.0.0
-Requires: python%{python3_pkgversion}-scitokens >= 1.7.0
+%package -n python3-%{srcname}
+Requires: python3dist(cryptography) >= 2.3
+Requires: python3dist(requests) >= 2.14
+Requires: python3dist(safe-netrc) >= 1.0.0
+Requires: python3dist(scitokens) >= 1.7.0
 Summary:  %{summary}
-%{?python_provide:%python_provide python%{python3_pkgversion}-%{srcname}}
-%description -n python%{python3_pkgversion}-%{srcname}
+%description -n python3-%{srcname}
 Python library functions to simplify using IGWN authorisation credentials.
 This project is primarily aimed at discovering X.509 credentials and
 SciTokens for use with HTTP(S) requests to IGWN-operated services.
@@ -68,7 +62,7 @@ PYTHONPATH=%{buildroot}%{python3_sitelib} \
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files -n python%{python3_pkgversion}-%{srcname}
+%files -n python3-%{srcname}
 %license LICENSE
 %doc README.md
 %{python3_sitelib}/*
