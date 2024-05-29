@@ -39,7 +39,7 @@ include:
   needs:
     - tarball
   variables:
-    TARBALL: "igwn-auth-utils-*.tar.*"
+    TARBALL: "igwn_auth_utils-*.tar.*"
   before_script:
     - !reference [".debian:dsc", "before_script"]
     # install dch
@@ -48,9 +48,9 @@ include:
     #    the debian changelog
     - tar -zxf ${TARBALL}
     # get version from the Python metadata
-    - PKG_VERSION=$(grep ^Version igwn-auth-utils-*/PKG-INFO | cut -d\  -f2)
+    - PKG_VERSION=$(grep ^Version igwn_auth_utils-*/PKG-INFO | cut -d\  -f2)
     # add a changelog entry for this version
-    - (cd igwn-auth-utils-*/; dch --force-bad-version --newversion ${PKG_VERSION}-9999 --controlmaint "ci build")
+    - (cd igwn_auth_utils-*/; dch --force-bad-version --newversion ${PKG_VERSION}-9999 --controlmaint "ci build")
     # repack the tarball
     - tar -zcf ${TARBALL} */
 
