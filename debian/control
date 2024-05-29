@@ -12,9 +12,9 @@ X-Python3-Version: >= 3.6
 Build-Depends:
  debhelper (>= 12),
  dh-python,
- lsb-release,
- python3-all,
- python3-setuptools (>= 38.2.5),
+ pybuild-plugin-pyproject,
+ python3-all (>= 3.6),
+ python3-setuptools (>= 61.0.0),
  python3-setuptools-scm,
  python3-wheel,
 

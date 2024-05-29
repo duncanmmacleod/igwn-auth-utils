@@ -1,5 +1,5 @@
 %define srcname igwn-auth-utils
-%define distname %{lua:name = string.gsub(rpm.expand("%{srcname}"), "-", "_"); print(name)}
+%global distname %{lua:name = string.gsub(rpm.expand("%{srcname}"), "[.-]", "_"); print(name)}
 %define version 1.1.0
 %define release 1
 
@@ -19,9 +19,9 @@ BuildArch: noarch
 Prefix:    %{_prefix}
 
 # build dependencies
-BuildRequires: python3-devel >= 3.6
+BuildRequires: python3-devel
 BuildRequires: python3dist(pip)
-BuildRequires: python3dist(setuptools) >= 38.2.5
+BuildRequires: python3dist(setuptools)
 BuildRequires: python3dist(setuptools-scm)
 BuildRequires: python3dist(wheel)
 
@@ -33,26 +33,69 @@ SciTokens for use with HTTP(S) requests to IGWN-operated services.
 # -- python-3X-igwn-auth-utils
 
 %package -n python3-%{srcname}
-Requires: python3dist(cryptography) >= 2.3
-Requires: python3dist(requests) >= 2.14
-Requires: python3dist(safe-netrc) >= 1.0.0
-Requires: python3dist(scitokens) >= 1.7.0
 Summary:  %{summary}
 %description -n python3-%{srcname}
 Python library functions to simplify using IGWN authorisation credentials.
 This project is primarily aimed at discovering X.509 credentials and
 SciTokens for use with HTTP(S) requests to IGWN-operated services.
+%files -n python3-%{srcname}
+%license LICENSE
+%doc README.md
+%{python3_sitelib}/*
 
 # -- build steps
 
 %prep
 %autosetup -n %{distname}-%{version}
 
+%define setuptools_version %(%python3 -c "import setuptools; print(setuptools.__version__.split('.', 1)[0])")
+%if 0%{?setuptools_version} < 61
+echo "Writing setup.cfg for setuptools %{setuptools_version}"
+# hack together setup.cfg for old setuptools to parse
+cat > setup.cfg << SETUP_CFG
+[metadata]
+name = %{srcname}
+version = %{version}
+author-email = %{packager}
+description = %{summary}
+license = %{license}
+license_files = LICENSE
+url = %{url}
+[options]
+packages = find:
+python_requires = >=3.6
+install_requires =
+  cryptography >= 2.3
+  requests >= 2.14
+  safe-netrc >= 1.0.0
+  scitokens >= 1.7.0
+SETUP_CFG
+%endif
+
+%if %{undefined pyproject_wheel}
+echo "Writing setup.py for py3_build_wheel"
+# write a setup.py to be called explicitly
+cat > setup.py << SETUP_PY
+from setuptools import setup
+setup(use_scm_version=True)
+SETUP_PY
+%endif
+
 %build
+# build a wheel
+%if %{defined pyproject_wheel}
+%pyproject_wheel
+%else
 %py3_build_wheel
+%endif
 
 %install
-%py3_install_wheel igwn_auth_utils-%{version}-*.whl
+# install the wheel
+%if %{defined pyproject_wheel}
+%pyproject_install
+%else
+%py3_install_wheel %{distname}-%{version}-*.whl
+%endif
 
 %check
 cd %{_buildrootdir}
@@ -61,11 +104,6 @@ PYTHONPATH=%{buildroot}%{python3_sitelib} \
 
 %clean
 rm -rf $RPM_BUILD_ROOT
-
-%files -n python3-%{srcname}
-%license LICENSE
-%doc README.md
-%{python3_sitelib}/*
 
 # -- changelog
 

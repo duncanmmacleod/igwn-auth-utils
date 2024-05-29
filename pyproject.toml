@@ -6,6 +6,68 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "igwn-auth-utils"
+description = "Authorisation utilities for IGWN"
+readme = "README.md"
+authors = [
+  { name = "Duncan Macleod", email = "duncan.macleod@ligo.org" },
+]
+license = { text = "BSD-3-Clause" }
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Intended Audience :: End Users/Desktop",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: BSD License",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Astronomy",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+requires-python = ">=3.6"
+dependencies = [
+  "cryptography >= 2.3",
+  "requests >= 2.14",
+  "safe-netrc >= 1.0.0",
+  "scitokens >= 1.7.0",
+]
+dynamic = [
+  "version",
+]
+
+[project.optional-dependencies]
+docs = [
+  "furo",
+  "sphinx >= 4.0.0",
+]
+test = [
+  "pytest >= 3.9.1",
+  "pytest-cov",
+  "requests-mock",
+]
+lint = [
+  "flake8 >= 3.7.0",
+  "flake8-bandit",
+]
+
+[project.urls]
+"Homepage" = "https://git.ligo.org/computing/igwn-auth-utils/"
+"Bug Tracker" = "https://git.ligo.org/computing/igwn-auth-utils/-/issues/"
+"Documentation" = "https://igwn-auth-utils.readthedocs.io"
+"Source Code" = "https://git.ligo.org/computing/igwn-auth-utils.git"
+
+# -- tools ------------------
+
 # -- coverage.py
 
 [tool.coverage.paths]
@@ -34,6 +96,18 @@ filterwarnings = [
   "ignore:Using or importing the ABCs::pyreadline",
   # ignore pkg_resources deprecation
   "ignore:.*pkg_resources.*",
+]
+
+# -- setuptools
+
+[tool.setuptools]
+license-files = [
+  "LICENSE",
+]
+
+[tool.setuptools.packages.find]
+include = [
+  "igwn_auth_utils*",
 ]
 
 # -- setuptools-scm
