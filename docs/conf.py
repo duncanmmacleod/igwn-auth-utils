@@ -36,21 +36,12 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.linkcode",
     "sphinx.ext.napoleon",
-    "sphinx_immaterial_igwn",
 ]
 default_role = "obj"
 
 # -- theme options ----------
 
-html_theme = "sphinx_immaterial_igwn"
-html_theme_options = {
-    "repo_name": project,
-    "repo_type": "gitlab",
-    "repo_url": git_url,
-}
-html_static_path = [
-    "_static",
-]
+html_theme = "furo"
 templates_path = [
     "_templates",
 ]
@@ -121,9 +112,3 @@ def linkcode_resolve(domain, info):
         top_module.__name__,
         fileref,
     )
-
-
-# -- setup ------------------
-
-def setup(app):
-    app.add_css_file("css/igwnauthutils.css")
