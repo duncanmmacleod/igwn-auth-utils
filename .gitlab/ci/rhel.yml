@@ -16,14 +16,6 @@ include:
   variables:
     EPEL: "true"
 
-.el7:
-  extends: .el
-  image: igwn/base:el7-testing
-
-.el7-build:
-  extends: .el7
-  image: igwn/builder:el7-testing
-
 .el8:
   extends: .el
   image: igwn/base:el8-testing
@@ -68,11 +60,6 @@ include:
           --define "_sourcedir ${CI_PROJECT_DIR}"
           rpm/*.spec
 
-srpm:el7:
-  extends:
-    - .srpm
-    - .el7-build
-
 srpm:el8:
   extends:
     - .srpm
@@ -96,13 +83,6 @@ srpm:el9:
   stage: Binary packages
   variables:
     SRPM: "python-igwn-auth-utils-*.src.rpm"
-
-rpm:el7:
-  extends:
-    - .rpm
-    - .el7-build
-  needs:
-    - srpm:el7
 
 rpm:el8:
   extends:
@@ -132,26 +112,15 @@ rpm:el9:
     # install our package(s)
     - yum -y -q install *.rpm
     # install testing dependencies
-    - PY3=$(rpm --eval '%{?python3_pkgversion:%{python3_pkgversion}}%{!?python3_pkgversion:3}')
-    - if [[ "${CI_JOB_NAME}" == *"el7" ]]; then
-      yum -y -q install
+    - dnf -y -q install
           findutils
-          python${PY3}-coverage
-          python${PY3}-pip
-          python${PY3}-pytest
-          python${PY3}-pytest-cov;
-      /usr/bin/python3 -m pip install requests-mock
-      ; else
-      dnf -y -q install
-          findutils
-          python${PY3}-coverage
-          python${PY3}-pytest
-          python${PY3}-pytest-cov
-          python${PY3}-requests-mock
-      ; fi
+          python3-coverage
+          python3-pytest
+          python3-pytest-cov
+          python3-requests-mock
     # install up-to-date pytest (RL<9)
-    - if [[ "${CI_JOB_NAME}" == *"el7" ]] || [[ "${CI_JOB_NAME}" == *"el8" ]]; then
-      yum install -y -q python${PY3}-pip &&
+    - if [[ "${CI_JOB_NAME}" == *"el8" ]]; then
+      yum install -y -q python3-pip &&
       /usr/bin/python3 -m pip install
         --upgrade-strategy=only-if-needed
         "pytest==3.9.1"
@@ -159,13 +128,6 @@ rpm:el9:
       ; fi
     # list installed packages
     - yum list installed
-
-test:el7:
-  extends:
-    - .test:el
-    - .el7
-  needs:
-    - rpm:el7
 
 test:el8:
   extends:
@@ -195,13 +157,6 @@ test:el9:
   variables:
     GIT_STRATEGY: fetch
     RPMLINT_OPTIONS: '--info --file .rpmlintrc'
-
-rpmlint:el7:
-  extends:
-    - .rpmlint
-    - .el7
-  needs:
-    - rpm:el7
 
 rpmlint:el8:
   extends:
