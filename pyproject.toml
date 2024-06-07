@@ -1,8 +1,8 @@
 [build-system]
 requires = [
-    "setuptools>=69.3.0",
-    "setuptools_scm[toml]>=3.4.3",
-    "wheel",
+  "setuptools>=69.3.0",
+  "setuptools_scm[toml]>=3.4.3",
+  "wheel",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -13,19 +13,14 @@ build-backend = "setuptools.build_meta"
 # enable merging coverage of installed module from
 # multiple platforms
 source = [
-    "igwn_auth_utils/",  # <-- source path, must come first
-    "/usr/lib/python*/*-packages/igwn_auth_utils/",
-    "/usr/local/lib/python*/*-packages/igwn_auth_utils/",
-]
-
-[tool.coverage.run]
-# don't report coverage for _version.py
-# (generated automatically by setuptools-scm)
-omit = [
-    "*/_version.py",
+  "igwn_auth_utils/",  # <-- source path, must come first
+  "*/igwn_auth_utils/",  # <-- any installed path
 ]
 
 [tool.coverage.report]
+omit = [
+  "*/_version.py",
+]
 # print report with one decimal point
 precision = 1
 
@@ -34,11 +29,11 @@ precision = 1
 [tool.pytest.ini_options]
 addopts = "-r a --color=yes"
 filterwarnings = [
-	"error",
-	# https://github.com/pyreadline/pyreadline/issues/65
-	"ignore:Using or importing the ABCs::pyreadline",
-	# ignore pkg_resources deprecation
-	"ignore:.*pkg_resources.*",
+  "error",
+  # https://github.com/pyreadline/pyreadline/issues/65
+  "ignore:Using or importing the ABCs::pyreadline",
+  # ignore pkg_resources deprecation
+  "ignore:.*pkg_resources.*",
 ]
 
 # -- setuptools-scm
