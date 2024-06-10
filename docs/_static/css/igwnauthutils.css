@@ -1,9 +1,0 @@
-/* style sheet for IGWN Auth Utils docs */
-/* Copyright (C) 2021 Cardff University */
-
-/* -- autoclass formatting ------------------------------------------------ */
-
-/* remove indent from class docs */
-[dir=ltr] .md-typeset .objdesc > dd {
-  margin-left: 0px;
-}
