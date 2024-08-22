@@ -3,6 +3,7 @@
 
 import datetime
 import os
+import warnings
 from pathlib import Path
 
 from cryptography.x509 import (
@@ -127,7 +128,20 @@ def _default_cert_path(prefix="x509up_"):
     return Path(tmpdir) / "{}{}".format(prefix, user)
 
 
-def find_credentials(timeleft=600):
+def _globus_cert_path():
+    """Returns the default paths for Globus 'grid' certificate files.
+    """
+    globusdir = Path.home() / ".globus"
+    return (
+        globusdir / "usercert.pem",
+        globusdir / "userkey.pem",
+    )
+
+
+def find_credentials(
+    timeleft=600,
+    on_error="warn",
+):
     """Locate X509 certificate and (optionally) private key files.
 
     This function checks the following paths in order:
@@ -137,19 +151,23 @@ def find_credentials(timeleft=600):
     - ``/tmp/x509up_u${UID}``
     - ``~/.globus/usercert.pem`` and ``~/.globus/userkey.pem``
 
-    Note
-    ----
-    If the ``X509_USER_{CERT,KEY,PROXY}`` variables are set, their paths
-    **are not** validated in any way, but are trusted to point at valid,
-    non-expired credentials.
-    The default paths in `/tmp` and `~/.globus` **are** validated before
-    being returned.
+    Any located X.509 credential is validated using
+    :func:`~igwn_auth_utils.find_x509_credentials`, with validation
+    failures handled according to ``on_error``.
 
     Parameters
     ----------
     timeleft : `int`
-        minimum required time left until expiry (in seconds)
+        The minimum required time (in seconds) remaining until expiry
         for a certificate to be considered 'valid'
+
+    on_error : `str`
+        How to handle errors reading/validating an X.509 certificate file.
+        One of:
+
+        - ``"ignore"`` - do nothing and move on to the next candidate
+        - ``"warn"`` - emit a warning and move on to the next candidate
+        - ``"raise"`` - raise the exception immediately
 
     Returns
     -------
@@ -166,6 +184,11 @@ def find_credentials(timeleft=600):
         if not certificate files can be found, or if the files found on
         disk cannot be validtted.
 
+    See also
+    --------
+    ~igwn_auth_utils.find_x509_credentials
+        For details of the certificate validation.
+
     Examples
     --------
     If no environment variables are set, but a short-lived certificate has
@@ -179,39 +202,75 @@ def find_credentials(timeleft=600):
     >>> find_credentials()
     ('/home/me/.globus/usercert.pem', '/home/me/.globus/userkey.pem')
     """
-    # -- check the environment variables (without validation)
+    def _validate(cert, key):
+        validate_certificate(cert, timeleft=timeleft)
 
-    try:
-        return os.environ['X509_USER_CERT'], os.environ['X509_USER_KEY']
-    except KeyError:
+        # check we can read the key file
+        if key is not None:
+            with open(key, "rb"):
+                pass
+
+    ignore = on_error == "ignore"
+    warn = on_error == "warn"
+    error = None
+
+    for candidate in _find_credentials():
+        # unpack cert, key pair or combined cert+key file
         try:
-            return os.environ['X509_USER_PROXY']
-        except KeyError:
-            pass
+            cert, key = candidate
+        except ValueError:
+            cert = candidate[0]
+            key = None
+        # validate and return if valid, otherwise move on
+        try:
+            _validate(cert, key)
+        except Exception as exc:
+            error = error or exc  # store (first) error for later
+            if ignore:
+                continue
+            msg = f"Failed to validate '{cert}': {type(exc).__name__}: {exc}"
+            if warn:
+                warnings.warn(msg)
+                continue
+            raise IgwnAuthError(msg) from exc  # stop here and raise
 
-    # -- look up some default paths (with validation)
-
-    # 1: /tmp/x509up_u<uid> (cert = key)
-    default = str(_default_cert_path())
-    if is_valid_certificate(default, timeleft):
-        return default
-
-    # 2: ~/.globus/user{cert,key}.pem
-    try:
-        globusdir = Path.home() / ".globus"
-    except RuntimeError:  # pragma: no cover
-        # no 'home'
-        pass
-    else:
-        cert = str(globusdir / "usercert.pem")
-        key = str(globusdir / "userkey.pem")
-        if (
-            is_valid_certificate(cert, timeleft)  # validate the cert
-            and os.access(key, os.R_OK)  # sanity check the key
-        ):
-            return cert, key
+        return str(cert) if key is None else (str(cert), str(key))
 
     raise IgwnAuthError(
         "could not find an RFC-3820 compliant X.509 credential, "
         "please generate one and try again.",
-    )
+    ) from error
+
+
+def _find_credentials():
+    """Yield all candidate X.509 credentials we can find.
+    """
+
+    # -- check environment variables
+    # unlike the default paths below, here we don't pre-check that the
+    # files actually exist; this allows the validation to fail and the
+    # user to receive a warning or exception about it
+
+    if "X509_USER_CERT" in os.environ and "X509_USER_KEY" in os.environ:
+        yield os.environ['X509_USER_CERT'], os.environ['X509_USER_KEY']
+
+    proxy = os.getenv("X509_USER_PROXY", None)
+    if proxy is not None:
+        yield proxy,
+
+    # -- look up some default paths
+
+    # 1: /tmp/x509up_u<uid> (cert = key)
+    default = _default_cert_path()
+    if default.exists():
+        yield default,
+
+    # 2: ~/.globus/user{cert,key}.pem
+    try:
+        cert, key = _globus_cert_path()
+    except RuntimeError:  # pragma: no cover
+        # no 'home'
+        pass
+    else:
+        if cert.exists() and key.exists():
+            yield cert, key

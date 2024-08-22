@@ -10,6 +10,7 @@ __credits__ = "Leo Singer <leo.singer@ligo.org>"
 import os
 import stat
 from netrc import NetrcParseError
+from pathlib import Path
 from unittest import mock
 from urllib.parse import urlencode
 
@@ -363,10 +364,27 @@ class TestSession:
     # test that Session auth and Request auth play nicely together
 
     @mock.patch(
-        "igwn_auth_utils.x509.is_valid_certificate",
-        return_value=False,
+        "igwn_auth_utils.x509._default_cert_path",
+        return_value=Path("does-not-exist"),
     )
-    def test_request_x509(self, is_valid, requests_mock, tmp_path):
+    @mock.patch(
+        "igwn_auth_utils.x509._globus_cert_path",
+        return_value=(Path("does-not-exist"), Path("does-not-exist")),
+    )
+    @mock.patch(
+        "igwn_auth_utils.x509.validate_certificate",
+        return_value=True,
+    )
+    def test_request_x509(
+        self,
+        # mocks
+        validate,
+        _globus,
+        _cert,
+        # fixtures
+        requests_mock,
+        tmp_path,
+    ):
         """Test that a request does its own search for an X.509 cert.
         """
         x509 = tmp_path / "x509"
