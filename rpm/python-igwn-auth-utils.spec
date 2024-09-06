@@ -48,8 +48,7 @@ SciTokens for use with HTTP(S) requests to IGWN-operated services.
 %prep
 %autosetup -n %{distname}-%{version}
 
-%define setuptools_version %(%python3 -c "import setuptools; print(setuptools.__version__.split('.', 1)[0])")
-%if 0%{?setuptools_version} < 61
+%if 0%{?rhel} && 0%{?rhel} < 10
 echo "Writing setup.cfg for setuptools %{setuptools_version}"
 # hack together setup.cfg for old setuptools to parse
 cat > setup.cfg << SETUP_CFG
