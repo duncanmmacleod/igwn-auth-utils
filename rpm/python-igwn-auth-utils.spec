@@ -1,6 +1,6 @@
 %define srcname igwn-auth-utils
 %global distname %{lua:name = string.gsub(rpm.expand("%{srcname}"), "[.-]", "_"); print(name)}
-%define version 1.1.0
+%define version 1.1.1
 %define release 1
 
 Name:      python-%{srcname}
@@ -48,8 +48,7 @@ SciTokens for use with HTTP(S) requests to IGWN-operated services.
 %prep
 %autosetup -n %{distname}-%{version}
 
-%define setuptools_version %(%python3 -c "import setuptools; print(setuptools.__version__.split('.', 1)[0])")
-%if 0%{?setuptools_version} < 61
+%if 0%{?rhel} && 0%{?rhel} < 10
 echo "Writing setup.cfg for setuptools %{setuptools_version}"
 # hack together setup.cfg for old setuptools to parse
 cat > setup.cfg << SETUP_CFG
@@ -108,6 +107,10 @@ rm -rf $RPM_BUILD_ROOT
 # -- changelog
 
 %changelog
+* Fri Sep 06 2024 Duncan Macleod <duncan.macleod@ligo.org> - 1.1.1-1
+- update to 1.1.1
+- update build to use pyproject.toml for all metadata
+
 * Wed Oct 18 2023 Duncan Macleod <duncan.macleod@ligo.org> - 1.1.0-1
 - update to 1.1.0
 

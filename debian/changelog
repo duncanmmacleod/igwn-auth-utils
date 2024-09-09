@@ -1,3 +1,10 @@
+igwn-auth-utils (1.1.1-1) unstable; urgency=low
+
+  * update to 1.1.1
+  * use pybuild-plugin-pyproject to build
+
+ -- Duncan Macleod <duncan.macleod@ligo.org>  Fri, 06 Sep 2024 14:35:00 +0100
+
 igwn-auth-utils (1.1.0-1) unstable; urgency=low
 
   * update to 1.1.0
