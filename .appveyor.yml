@@ -3,11 +3,10 @@ environment:
   global:
     MINICONDA: C:\Miniconda38-x64
   matrix:
-    - PYTHON_VERSION: 3.8
-    - PYTHON_VERSION: 3.9
     - PYTHON_VERSION: 3.10
     - PYTHON_VERSION: 3.11
     - PYTHON_VERSION: 3.12
+    - PYTHON_VERSION: 3.13
 install:
   - "set PATH=%MINICONDA%\\condabin;%PATH%"
   - call "%MINICONDA%\\Scripts\\activate.bat"
