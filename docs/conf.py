@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2021-2024 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
