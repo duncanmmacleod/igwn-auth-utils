@@ -6,6 +6,11 @@ include:
       install_extra: "test"
       code_quality_analyzer: "ruff"
       run_advanced_sast: true
+      python_versions:
+        - "3.9"
+        - "3.10"
+        - "3.11"
+        - "3.12"
 
   # -- Debian packaging --------------
 
