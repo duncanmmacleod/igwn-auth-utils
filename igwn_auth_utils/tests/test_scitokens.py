@@ -145,6 +145,23 @@ def test_is_valid_token(rtoken, scope, validity):
     ) is validity
 
 
+@pytest.mark.parametrize(("issuer", "validity"), (
+    (None, True),  # no specified issuer
+    (ISSUER, True),  # simple single issuer
+    (["something", ISSUER], True),  # multiple issuers with match
+    (["something", "somethingelse"], False)  # multiple issuers with mismatch
+))
+def test_is_valid_token_issuers(rtoken, issuer, validity):
+    """Test that `is_valid_token` works with various ``issuer`` inputs.
+    """
+    assert igwn_scitokens.is_valid_token(
+        rtoken,
+        READ_AUDIENCE,
+        READ_SCOPE,
+        issuer=issuer,
+    ) is validity
+
+
 @pytest.mark.parametrize(("scope", "validity"), [
     (READ_SCOPE, True),
     (WRITE_SCOPE, True),
