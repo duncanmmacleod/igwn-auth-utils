@@ -1,90 +1,61 @@
 include:
-  # -- Python -------------------------
+  # -- Python ------------------------
 
-  - component: $CI_SERVER_FQDN/computing/gitlab/components/python/all@main
+  - component: $CI_SERVER_FQDN/computing/gitlab/components/python/all@2
     inputs:
       install_extra: "test"
+      run_advanced_sast: true
 
-  # -- Debian packaging ---------------
+  # -- Debian packaging --------------
 
-  - component: $CI_SERVER_FQDN/computing/gitlab/components/debian/all@main
+  - component: $CI_SERVER_FQDN/computing/gitlab/components/debian/all@2
     inputs:
       needs: [sdist]
       debian_versions:
-        - bullseye-backports
+        - bullseye
         - bookworm
       test_install: &system_test_install >-
+        python3-igwn-auth-utils
         python3-pytest
         python3-pytest-cov
         python3-requests-mock
+      test_script: &system_test_script
+        - /usr/bin/python3 -m pytest
+            -ra
+            --cov igwn_auth_utils
+            --durations 0
+            --junit-xml junit.xml
+            --pyargs igwn_auth_utils.tests
+            --verbose
+        # report coverage
+        - python3 -m coverage xml
 
-  # -- Red Hat packaging --------------
+  # -- Red Hat packaging -------------
 
-  - component: $CI_SERVER_FQDN/computing/gitlab/components/redhat/all@main
+  - component: $CI_SERVER_FQDN/computing/gitlab/components/redhat/all@2
     inputs:
       needs: [sdist]
       redhat_versions:
         - 8
         - 9
       test_install: *system_test_install
+      test_script: *system_test_script
 
-  # -- Documentation ------------------
+  # -- Documentation -----------------
 
-  - component: $CI_SERVER_FQDN/computing/gitlab/components/sphinx/build@main
+  - component: $CI_SERVER_FQDN/computing/gitlab/components/sphinx/build@~latest
     inputs:
       requirements: ".[docs]"
 
-# -- customisations
-#
-# Configure tests of the system-installed package
-#
+# -- customisations ------------------
 
-.system_install_test:
-  variables:
-    COVERAGE_FILE: ".coverage-${CI_JOB_NAME_SLUG}"
-    GIT_STRATEGY: none
-  script:
-    # install a newer version of pytest on EL8
-    - if [[ "${CI_JOB_NAME}" == "redhat_test_el8" ]]; then
-      dnf install -y -q python3-pip &&
-      /usr/bin/python3 -m pip install
-        --upgrade-strategy=only-if-needed
-        "pytest==3.9.1"
-        "coverage[toml]>=5"
-      ; fi
-    # run pytest with coverage
-    - /usr/bin/python3 -m pytest
-        -ra
-        --cov igwn_auth_utils
-        --durations 0
-        --junit-xml junit.xml
-        --pyargs igwn_auth_utils.tests
-        --verbose
-    # report coverage
-    - python3 -m coverage xml
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.yml
-      junit: junit.xml
-    paths:
-      - .coverage*
-
-# insert the variables, script, and artifacts into the test template
-# for debian and redhat
-
-debian_test:
-  variables: !reference [.system_install_test, variables]
-  script: !reference [.system_install_test, script]
-  artifacts: !reference [.system_install_test, artifacts]
-
-redhat_test:
-  variables: !reference [.system_install_test, variables]
-  script: !reference [.system_install_test, script]
-  artifacts: !reference [.system_install_test, artifacts]
-
-# skip tests on old pytest
 redhat_test_el8:
-  variables:
-    PYTEST_ADDOPTS: "-ra -v --pyargs igwn_auth_utils.tests -k 'not test_query_mock'"
+  before_script:
+    - !reference [redhat_test, before_script]
+    # install a newer version of pytest and friends on EL8
+    - dnf install -y -q python3-pip &&
+      python3 -m pip install
+        --upgrade-strategy=only-if-needed
+        "coverage[toml]==5.3"
+        "pytest==6.0.0"
+        "pytest-cov==2.10.1"
