@@ -4,6 +4,7 @@ include:
   - component: $CI_SERVER_FQDN/computing/gitlab/components/python/all@2
     inputs:
       install_extra: "test"
+      code_quality_analyzer: "ruff"
       run_advanced_sast: true
 
   # -- Debian packaging --------------

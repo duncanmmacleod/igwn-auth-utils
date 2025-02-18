@@ -55,10 +55,6 @@ test = [
   "pytest-cov",
   "requests-mock",
 ]
-lint = [
-  "flake8 >= 3.7.0",
-  "flake8-bandit",
-]
 
 [project.urls]
 "Homepage" = "https://git.ligo.org/computing/igwn-auth-utils/"
@@ -96,6 +92,38 @@ filterwarnings = [
   "ignore:Using or importing the ABCs::pyreadline",
   # ignore pkg_resources deprecation
   "ignore:.*pkg_resources.*",
+]
+
+# -- ruff
+
+[tool.ruff.lint]
+select = [
+  # mccabe
+  "C90",
+  # pycodestyle errors
+  "E",
+  # flake8-executable
+  "EXE",
+  # pyflakes
+  "F",
+  # isort
+  "I",
+  # pep8-naming
+  "N",
+  # pyupgrade
+  "UP",
+  # pycodestyle warnings
+  "W",
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-wrap-aliases = true
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+  "F401",  # unused-import
+  "F403",  # undefined-local-with-import-star
 ]
 
 # -- setuptools
