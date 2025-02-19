@@ -64,10 +64,10 @@ url = %{url}
 packages = find:
 python_requires = >=3.6
 install_requires =
-  cryptography >= 2.3
-  requests >= 2.14
-  safe-netrc >= 1.0.0
-  scitokens >= 1.7.0
+  cryptography >= 3.2
+  requests >= 2.20
+  safe-netrc >= 1.0
+  scitokens >= 1.8
 SETUP_CFG
 %endif
 
