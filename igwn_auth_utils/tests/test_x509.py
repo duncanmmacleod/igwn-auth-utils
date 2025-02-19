@@ -20,19 +20,17 @@ except ImportError:  # Python < 3.7
     def nullcontext(enter_result=None):
         yield enter_result
 
+import pytest
 from cryptography import x509
-from cryptography.x509.oid import NameOID
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import (
     hashes,
     serialization,
 )
-
-import pytest
+from cryptography.x509.oid import NameOID
 
 from .. import x509 as igwn_x509
 from ..error import IgwnAuthError
-
 
 # -- fixtures ---------------
 
