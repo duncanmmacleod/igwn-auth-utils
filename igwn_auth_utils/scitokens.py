@@ -16,7 +16,7 @@ from jwt import (
     InvalidTokenError,
 )
 from scitokens import (
-    Enforcer,
+    Enforcer as _Enforcer,
     SciToken,
 )
 from scitokens.utils.errors import SciTokensException
@@ -33,7 +33,25 @@ TOKEN_ERROR = (
 
 WINDOWS = os.name == "nt"
 
+
 # -- utilities --------------
+
+class Enforcer(_Enforcer):
+    """Custom `scitokens.Enforcer for IGWN Auth Utils`.
+    """
+    def __init__(self, *args, timeleft=0, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._timeleft = timeleft
+        self.add_validator("exp", self._validate_timeleft)
+
+    def _validate_iss(self, value):
+        if isinstance(self._issuer, (str, bytes)):
+            return super()._validate_iss(value)
+        return value in self._issuer
+
+    def _validate_timeleft(self, value):
+        exp = float(value)
+        return exp >= self._now + self._timeleft
 
 
 def is_valid_token(
@@ -61,8 +79,10 @@ def is_valid_token(
         The amount of time remaining (in seconds, from the `exp` claim)
         to require.
 
-    issuer : `str`
+    issuer : `str`, `list` of `str`
         The value of the `iss` claim to enforce.
+        If ``issuer`` is given as a list (or other non-stringy container),
+        the token will be required to match any of the entries.
 
     warn : `bool`
         If `True`, emit a warning when a token fails the enforcer test,
@@ -81,21 +101,20 @@ def is_valid_token(
         except (InvalidTokenError, SciTokensException):
             return False
 
-    # construct the enforcer
+    # allow not specifying a required issuer
     if issuer is None:  # borrow the issuer from the token itself
         issuer = token["iss"]
-    enforcer = Enforcer(issuer, audience=audience)
-
-    # add validator for timeleft
-    def _validate_timeleft(value):
-        exp = float(value)
-        return exp >= enforcer._now + timeleft
-
-    enforcer.add_validator("exp", _validate_timeleft)
 
     # if scope wasn't given, borrow one from the token to pass validation
     if scope is None:
         scope = token["scope"].split(" ", 1)[:1]
+
+    # construct the issuer
+    enforcer = Enforcer(
+        issuer,
+        audience=audience,
+        timeleft=timeleft,
+    )
 
     # iterate over given scopes and test all of them
     if isinstance(scope, str):
