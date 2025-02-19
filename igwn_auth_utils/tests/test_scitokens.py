@@ -240,6 +240,22 @@ def test_is_valid_token_invalidauthorizationresources(private_key):
     )
 
 
+@pytest.mark.parametrize(("timeleft", "result"), [
+    (0, True),
+    (1e6, False),
+])
+def test_is_valid_token_timeleft(rtoken, timeleft, result):
+    """Check that `is_valid_token` handles ``timeleft`` correctly.
+    """
+    assert igwn_scitokens.is_valid_token(
+        rtoken,
+        READ_AUDIENCE,
+        READ_SCOPE,
+        issuer=ISSUER,
+        timeleft=timeleft,
+    ) is result
+
+
 def test_is_valid_token_warn(rtoken):
     """Check that `is_valid_token` emits warnings when asked.
     """
