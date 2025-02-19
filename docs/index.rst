@@ -5,7 +5,7 @@
 .. toctree::
    :hidden:
 
-   Home <self>
+   igwn-auth-utils <self>
 
 Python library functions to simplify using `IGWN <https://www.ligo.org>`__
 authorisation credentials.
@@ -21,14 +21,16 @@ Installation
 ``igwn-auth-utils`` can be installed via `Conda <https://conda.io>`:
 
 .. code-block:: shell
+    :caption: Installing igwn-auth-utils with Conda.
 
-   conda install -c conda-forge igwn-auth-utils
+    conda install -c conda-forge igwn-auth-utils
 
 or `pip <https://pip.pypa.io>`_:
 
 .. code-block:: shell
+    :caption: Installing igwn-auth-utils with Pip.
 
-   python -m pip install igwn-auth-utils
+    python -m pip install igwn-auth-utils
 
 Binary packages are also available for various Debian and RHEL
 distributions supported by the LIGO Scientific Collaboration's
