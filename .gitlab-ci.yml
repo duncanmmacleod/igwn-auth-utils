@@ -34,6 +34,8 @@ include:
 
   - component: $CI_SERVER_FQDN/computing/gitlab/components/redhat/all@2
     inputs:
+      # https://git.ligo.org/computing/helpdesk/-/issues/7162
+      disable_repos: "igwn-backports*"
       needs: [sdist]
       redhat_versions:
         - 8
