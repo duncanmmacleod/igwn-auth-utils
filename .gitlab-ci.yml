@@ -59,3 +59,10 @@ redhat_test_el8:
         "coverage[toml]==5.3"
         "pytest==6.0.0"
         "pytest-cov==2.10.1"
+
+sphinx:
+  before_script:
+    # install graphviz to get inheritance graphs
+    - apt-get -yqq update && apt-get -yqq install
+        graphviz
+    - !reference [.sphinx, before_script]

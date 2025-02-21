@@ -2,17 +2,20 @@
 # See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
 version: 2
 
-# Build documentation in the docs/ directory with Sphinx
-sphinx:
-  builder: dirhtml
-  configuration: docs/conf.py
+build:
+  os: ubuntu-lts-latest
+  tools:
+    python: "3.12"
+  apt_packages:
+    - graphviz
 
-# Optionally declare the Python requirements required to build your docs
 python:
-  version: "3.8"
   install:
     - method: pip
       path: .
       extra_requirements:
         - docs
-        - requests
+
+sphinx:
+  builder: dirhtml
+  configuration: docs/conf.py
