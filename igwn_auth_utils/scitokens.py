@@ -160,7 +160,7 @@ def target_audience(url, include_any=True):
     -------
     audiences : `list` of `str`
         A `list` of audience values (`str`), either of length 1
-        if ``include_any=False`, otherwise of length 2.
+        if ``include_any=False``, otherwise of length 2.
 
     Examples
     --------
@@ -211,7 +211,18 @@ def deserialize_token(raw, **kwargs):
     See also
     --------
     scitokens.SciToken.deserialize
-        for details of the deserialisation, and any valid keyword arguments
+        The underlying deserialisation implementation.
+
+    load_token_file
+        A convenient wrapper for loading a
+        `~scitokens.SciToken` from a file.
+
+    Examples
+    --------
+    To load a token from a file:
+
+    >>> with open("scitoken.use") as file:
+    ...     token = deserialize_token(file)
     """
     return SciToken.deserialize(raw.strip(), **kwargs)
 

@@ -17,10 +17,11 @@ To use this interface, open a :class:`~igwn_auth_utils.Session`
 and make some requests:
 
 .. code-block:: python
+    :caption: Make a request with `igwn_auth_utils.Session`.
 
-   >>> from igwn_auth_utils import Session
-   >>> with Session() as sess:
-   ...     sess.get("https://myservice.example.com/api/important/data")
+    from igwn_auth_utils import Session
+    with Session() as sess:
+        sess.get("https://myservice.example.com/api/important/data")
 
 The :class:`igwn_auth_utils.Session` class will automatically discover
 available SciTokens and X.509 credentials and will send them with the

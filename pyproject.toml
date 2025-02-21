@@ -50,7 +50,10 @@ dynamic = [
 [project.optional-dependencies]
 docs = [
   "furo",
-  "sphinx >= 4.0.0",
+  "Sphinx >= 4.0.0",
+  "sphinx-automodapi",
+  "sphinx-copybutton",
+  "sphinx-github-style",
 ]
 test = [
   "pytest >= 3.9.1",

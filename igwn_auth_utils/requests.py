@@ -12,6 +12,7 @@ __credits__ = "Leo Singer <leo.singer@ligo.org>"
 
 import sys
 from functools import wraps
+from textwrap import indent
 from unittest import mock
 
 import requests
@@ -240,130 +241,133 @@ def _prepare_auth(
 # -- Session handling -----------------
 
 _auth_session_parameters = """
-    Discovery/configuration of authorisation/authentication methods
-    is attempted in the following order:
+Discovery/configuration of authorisation/authentication methods
+is attempted in the following order:
 
-    1.  if ``force_noauth=True`` is given, no auth is configured;
+1.  if ``force_noauth=True`` is given, no auth is configured;
 
-    2.  for SciTokens:
+2.  for SciTokens:
 
-        1.  if a bearer token is provided via the ``token`` keyword argument,
-            then use that, or
+    1.  if a bearer token is provided via the ``token`` keyword argument,
+        then use that, or
 
-        2.  look for a bearer token by passing the ``token_audience``
-            and ``token_scope`` keyword parameters to
-            :func:`igwn_auth_utils.find_scitokens`;
+    2.  look for a bearer token by passing the ``token_audience``
+        and ``token_scope`` keyword parameters to
+        :func:`igwn_auth_utils.find_scitokens`;
 
-    3.  for X.509 credentials:
+3.  for X.509 credentials:
 
-        1.  if an X.509 credential path is provided via the ``cert`` keyword
-            argument, then use that, or
+    1.  if an X.509 credential path is provided via the ``cert`` keyword
+        argument, then use that, or
 
-        2.  look for an X.509 credential using
-            :func:`igwn_auth_utils.find_x509_credential`
+    2.  look for an X.509 credential using
+        :func:`igwn_auth_utils.find_x509_credential`
 
-    4.  for basic auth (username/password):
+4.  for basic auth (username/password):
 
-        1.  if ``auth`` keyword is provided, then use that, or
+    1.  if ``auth`` keyword is provided, then use that, or
 
-        2.  read the netrc file located at :file:`~/.netrc`, or at the path
-            stored in the :envvar:`$NETRC` environment variable, and look
-            for a username and password matching the hostname given in the
-            ``url`` keyword argument;
+    2.  read the netrc file located at :file:`~/.netrc`, or at the path
+        stored in the :envvar:`$NETRC` environment variable, and look
+        for a username and password matching the hostname given in the
+        ``url`` keyword argument;
 
-    5.  if none of the above yield a credential, and ``fail_if_noauth=True``
-        was provided, raise a `ValueError`.
+5.  if none of the above yield a credential, and ``fail_if_noauth=True``
+    was provided, raise a `ValueError`.
 
-    Steps 2 and 3 are all tried independently, with all valid credentials
-    (one per type) configured for the session.
-    Only when SciTokens are disabled (``token=False``), will step 4 will be
-    tried to configure basic username/password auth.
-    It is up to the request receiver to handle the multiple credential
-    types and prioritise between them.
+Steps 2 and 3 are all tried independently, with all valid credentials
+(one per type) configured for the session.
+Only when SciTokens are disabled (``token=False``), will step 4 will be
+tried to configure basic username/password auth.
+It is up to the request receiver to handle the multiple credential
+types and prioritise between them.
 
-    Parameters
-    ----------
-    token : `scitokens.SciToken`, `str`, `bool`, optional
-        Bearer token (scitoken) input, one of
+Parameters
+----------
+token : `scitokens.SciToken`, `str`, `bool`, optional
+    Bearer token (scitoken) input, one of
 
-        - a bearer token (`scitokens.SciToken`),
-        - a serialised token (`str`, `bytes`),
-        - `False`: disable using tokens completely
-        - `True`: discover a valid token via
-          :func:`igwn_auth_utils.find_scitoken` and
-          error if something goes wrong
-        - `None`: try and discover a valid token, but
-          try something else if that fails
+    - a bearer token (`scitokens.SciToken`),
+    - a serialised token (`str`, `bytes`),
+    - `False`: disable using tokens completely
+    - `True`: discover a valid token via
+      :func:`igwn_auth_utils.find_scitoken` and
+      error if something goes wrong
+    - `None`: try and discover a valid token, but
+      try something else if that fails
 
-    token_audience : `str`, list` of `str`
-        The value(s) of the audience (``aud``) claim to pass to
-        :func:`igwn_auth_utils.find_scitoken` when discovering
-        available tokens.
+token_audience : `str`, list` of `str`
+    The value(s) of the audience (``aud``) claim to pass to
+    :func:`igwn_auth_utils.find_scitoken` when discovering
+    available tokens.
 
-    token_scope : `str`
-        The value(s) of the ``scope`` to pass to
-        :func:`igwn_auth_utils.find_scitoken` when discovering
-        available tokens.
+token_scope : `str`
+    The value(s) of the ``scope`` to pass to
+    :func:`igwn_auth_utils.find_scitoken` when discovering
+    available tokens.
 
-    token_issuer : `str`
-        The value of the issuer (``iss``) claim to pass to
-        :func:`igwn_auth_utils.find_scitoken` when discovering
-        available tokens.
+token_issuer : `str`
+    The value of the issuer (``iss``) claim to pass to
+    :func:`igwn_auth_utils.find_scitoken` when discovering
+    available tokens.
 
-    cert : `str`, `tuple`, `bool`, optional
-        X.509 credential input, one of
+cert : `str`, `tuple`, `bool`, optional
+    X.509 credential input, one of
 
-        - path to a PEM-format certificate file,
-        - a ``(cert, key)`` `tuple`,
-        - `False`: disable using X.509 completely
-        - `True`: discover a valid cert via
-          :func:`igwn_auth_utils.find_x509_credentials` and
-          error if something goes wrong
-        - `None`: try and discover a valid cert, but
-          try something else if that fails
+    - path to a PEM-format certificate file,
+    - a ``(cert, key)`` `tuple`,
+    - `False`: disable using X.509 completely
+    - `True`: discover a valid cert via
+      :func:`igwn_auth_utils.find_x509_credentials` and
+      error if something goes wrong
+    - `None`: try and discover a valid cert, but
+      try something else if that fails
 
-    auth :  `tuple`, `object`, optional
-        ``(username, password)`` `tuple` or other authentication/authorization
-        object to attach to a `~requests.Request`.
-        By default a new :class:`HTTPSciTokenAuth` handler will be attached
-        to configure ``Authorization`` headers for each request.
+auth :  `tuple`, `object`, optional
+    ``(username, password)`` `tuple` or other authentication/authorization
+    object to attach to a `~requests.Request`.
+    By default a new :class:`HTTPSciTokenAuth` handler will be attached
+    to configure ``Authorization`` headers for each request.
 
-    url : `str`, optional
-        the URL/host that will be queried within this session; this is used
-        to set the default ``token_audience`` and to access credentials
-        via :mod:`safe_netrc`.
+url : `str`, optional
+    the URL/host that will be queried within this session; this is used
+    to set the default ``token_audience`` and to access credentials
+    via :mod:`safe_netrc`.
 
-    force_noauth : `bool`, optional
-        Disable the use of any authorisation credentials (mainly for testing).
+force_noauth : `bool`, optional
+    Disable the use of any authorisation credentials (mainly for testing).
 
-    fail_if_noauth : `bool`, optional
-        Raise a `~igwn_auth_utils.IgwnAuthError` if no authorisation
-        credentials are presented or discovered.
+fail_if_noauth : `bool`, optional
+    Raise a `~igwn_auth_utils.IgwnAuthError` if no authorisation
+    credentials are presented or discovered.
 
-    raise_for_status : `bool`, optional
-        If `True` (default), automatically call
-        :meth:`~requests.Response.raise_for_status` after receiving
-        any response.
+raise_for_status : `bool`, optional
+    If `True` (default), automatically call
+    :meth:`~requests.Response.raise_for_status` after receiving
+    any response.
 
-    Raises
-    ------
-    ~igwn_auth_utils.IgwnAuthError
-        If ``cert=True`` or ``token=True`` is given and the relevant
-        credential was not actually discovered, or
-        if ``fail_if_noauth=True`` is given and no authorisation
-        token/credentials of any valid type are presented or discovered.
+Raises
+------
+~igwn_auth_utils.IgwnAuthError
+    If ``cert=True`` or ``token=True`` is given and the relevant
+    credential was not actually discovered, or
+    if ``fail_if_noauth=True`` is given and no authorisation
+    token/credentials of any valid type are presented or discovered.
 
-    See also
-    --------
-    requests.Session
-        for details of the standard options
+See also
+--------
+requests.Session
+    for details of the standard options
 
-    igwn_auth_utils.find_scitoken
-        for details of the SciToken discovery
+igwn_auth_utils.find_scitoken
+    for details of the SciToken discovery
 
-    igwn_auth_utils.find_x509_credentials
-        for details of the X.509 credential discovery
-    """.strip()
+igwn_auth_utils.find_x509_credentials
+    for details of the X.509 credential discovery
+""".strip()
+if sys.version_info < (3, 13, 0):
+    # older versions don't have https://github.com/python/cpython/issues/81283
+    _auth_session_parameters = indent(_auth_session_parameters, "    ").strip()
 
 
 def _hook_raise_for_status(response, *args, **kwargs):
