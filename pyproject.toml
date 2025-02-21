@@ -130,6 +130,10 @@ force-wrap-aliases = true
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
+ignore-decorators = [
+  "functools.wraps",
+  "typing.overload",
+]
 
 # -- setuptools
 

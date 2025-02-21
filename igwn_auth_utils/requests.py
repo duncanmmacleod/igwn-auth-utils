@@ -35,7 +35,7 @@ from .x509 import (
 # -- Auth utilities -------------------
 
 def _find_cred(func, *args, error=True, **kwargs):
-    """Find a credential and maybe ignore an `~igwn_auth_utils.IgwnAuthError`
+    """Find a credential and maybe ignore an `~igwn_auth_utils.IgwnAuthError`.
 
     This is an internal utility for the `SessionAuthMixin._init_auth`
     method which shouldn't necessary fail if it doesn't
@@ -52,16 +52,14 @@ def _find_cred(func, *args, error=True, **kwargs):
 
 @wraps(requests_utils.get_netrc_auth)
 def get_netrc_auth(url, raise_errors=False):
-    """Wrapper around `requests.utils.get_netrc_auth` to use `safe_netrc`.
-    """
     import safe_netrc
     with mock.patch.dict(sys.modules, {"netrc": safe_netrc}):
         return requests_utils.get_netrc_auth(url, raise_errors=raise_errors)
 
 
 class HTTPSciTokenAuth(_AuthBase):
-    """Auth handler for SciTokens.
-    """
+    """Auth handler for SciTokens."""
+
     def __init__(
         self,
         token=None,
@@ -75,6 +73,7 @@ class HTTPSciTokenAuth(_AuthBase):
         self.issuer = issuer
 
     def __eq__(self, other):
+        """Return `True` if this object provides the same auth as ``other``."""
         return all([
             self.token == getattr(other, "token", None),
             self.audience == getattr(other, "audience", None),
@@ -83,6 +82,7 @@ class HTTPSciTokenAuth(_AuthBase):
         ])
 
     def __ne__(self, other):
+        """Return `True` if this object and ``other`` provide the same auth."""
         return not self == other
 
     @staticmethod
@@ -125,8 +125,7 @@ class HTTPSciTokenAuth(_AuthBase):
         )
 
     def __call__(self, r):
-        """Augment the `Request` ``r`` with an ``Authorization`` header.
-        """
+        """Augment the `Request` ``r`` with an ``Authorization`` header."""
         token = self.token
         if token in (None, True):
             token = self.find_token(
@@ -153,8 +152,7 @@ def _prepare_auth(
     fail_if_noauth=False,
     session=None,
 ):
-    """Prepare authorisation for a session or request.
-    """
+    """Prepare authorisation for a session or request."""
     # merge settings from the session
     if session:
         if cert is None:
@@ -371,7 +369,7 @@ if sys.version_info < (3, 13, 0):
 
 
 def _hook_raise_for_status(response, *args, **kwargs):
-    """Response hook to raise exception for any HTTP error (status >= 400)
+    """Response hook to raise exception for any HTTP error (status >= 400).
 
     Reproduced (with permission) from :mod:`requests_gracedb.errors`,
     authored by Leo Singer.
@@ -380,12 +378,12 @@ def _hook_raise_for_status(response, *args, **kwargs):
 
 
 class SessionErrorMixin:
-    """A mixin for :class:`requests.Session` to raise exceptions for HTTP
-    errors.
+    """`requests.Session` mixin to raise exceptions for HTTP errors.
 
     Reproduced (with permission) from :mod:`requests_gracedb.errors`,
     authored by Leo Singer.
     """
+
     def __init__(self, *args, **kwargs):
         raise_for_status = kwargs.pop("raise_for_status", True)
         super().__init__(*args, **kwargs)
@@ -404,6 +402,7 @@ class SessionAuthMixin:
 
     {parameters}
     """
+
     def __init__(
         self,
         token=None,
@@ -434,8 +433,7 @@ class SessionAuthMixin:
         )
 
     def _init_auth(self, url=None, token=None, **kwargs):
-        """Initialise the auth handler for this `Session`.
-        """
+        """Initialise the auth handler for this `Session`."""
         # find creds if we can
         self.auth, self.cert = _prepare_auth(url=url, token=token, **kwargs)
 
@@ -494,6 +492,7 @@ class Session(
     >>> with Session(force_noauth=True) as sess:
     ...     sess.get("https://science.example.com/api/important/data")
     """
+
     __attrs__ = requests.Session.__attrs__ = [
         "token",
     ]
@@ -570,7 +569,7 @@ def request(method, url, *args, session=None, **kwargs):
     resp : `requests.Response`
         the response object
 
-    See also
+    See Also
     --------
     igwn_auth_utils.requests.Session.request
         for information on how the request is performed
@@ -599,37 +598,38 @@ def request(method, url, *args, session=None, **kwargs):
 
 
 _request_wrapper_doc = """
-    Send an HTTP {METHOD} request to the specified URL with IGWN Auth attached.
+Send an HTTP {METHOD} request to the specified URL with IGWN Auth attached.
 
-    Parameters
-    ----------
-    url : `str`
-        The URL to request.
+Parameters
+----------
+url : `str`
+    The URL to request.
 
-    session : `requests.Session`, optional
-        The connection session to use, if not given one will be
-        created on-the-fly.
+session : `requests.Session`, optional
+    The connection session to use, if not given one will be
+    created on-the-fly.
 
-    args, kwargs
-        All other keyword arguments are passed directly to
-        :meth:`requests.Session.{method}`
+args, kwargs
+    All other keyword arguments are passed directly to
+    :meth:`requests.Session.{method}`
 
-    Returns
-    -------
-    resp : `requests.Response`
-        the response object
+Returns
+-------
+resp : `requests.Response`
+    the response object
 
-    See also
-    --------
-    requests.Session.{method}
-        for information on how the request is performed
+See Also
+--------
+requests.Session.{method}
+    for information on how the request is performed
 """.strip()
+if sys.version_info < (3, 13, 0):
+    # older versions don't have https://github.com/python/cpython/issues/81283
+    _request_wrapper_doc = indent(_request_wrapper_doc, "    ").strip()
 
 
 def _request_wrapper_factory(method):
-    """Factor function to wrap a :mod:`requests` HTTP method to use
-    our request function.
-    """
+    """Return a wrapper around ``method`` that uses our `request` function."""
     def _request_wrapper(url, *args, session=None, **kwargs):
         return request(method, url, *args, session=session, **kwargs)
 

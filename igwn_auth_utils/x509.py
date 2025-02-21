@@ -1,6 +1,8 @@
 # Copyright 2021 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
+"""Utilities for discovering and handling X.509 credentials."""
+
 import datetime
 import os
 import warnings
@@ -16,7 +18,7 @@ from .error import IgwnAuthError
 
 
 def load_x509_certificate_file(file, backend=None):
-    """Load a PEM-format X.509 certificate from a file, or file path
+    """Load a PEM-format X.509 certificate from a file, or file path.
 
     Parameters
     ----------
@@ -40,7 +42,7 @@ def load_x509_certificate_file(file, backend=None):
 
 
 def validate_certificate(cert, timeleft=600):
-    """Validate an X.509 certificate by checking it's expiry time
+    """Validate an X.509 certificate by checking it's expiry time.
 
     Parameters
     ----------
@@ -67,7 +69,7 @@ def validate_certificate(cert, timeleft=600):
 
 
 def is_valid_certificate(cert, timeleft=600):
-    """Returns True if ``cert`` contains a valid X.509 certificate
+    """Return True if ``cert`` contains a valid X.509 certificate.
 
     Parameters
     ----------
@@ -93,8 +95,7 @@ def is_valid_certificate(cert, timeleft=600):
 
 
 def _timeleft(cert):
-    """Returns the time remaining (in seconds) for a ``cert``
-    """
+    """Return the time remaining (in seconds) for a ``cert``."""
     try:
         expiry = cert.not_valid_after_utc
     except AttributeError:
@@ -105,7 +106,7 @@ def _timeleft(cert):
 
 
 def _default_cert_path(prefix="x509up_"):
-    """Returns the temporary path for a user's X509 certificate
+    r"""Return the temporary path for a user's X509 certificate.
 
     Examples
     --------
@@ -129,8 +130,7 @@ def _default_cert_path(prefix="x509up_"):
 
 
 def _globus_cert_path():
-    """Returns the default paths for Globus 'grid' certificate files.
-    """
+    """Return the default paths for Globus 'grid' certificate files."""
     globusdir = Path.home() / ".globus"
     return (
         globusdir / "usercert.pem",
@@ -184,7 +184,7 @@ def find_credentials(
         if not certificate files can be found, or if the files found on
         disk cannot be validtted.
 
-    See also
+    See Also
     --------
     ~igwn_auth_utils.find_x509_credentials
         For details of the certificate validation.
@@ -243,9 +243,7 @@ def find_credentials(
 
 
 def _find_credentials():
-    """Yield all candidate X.509 credentials we can find.
-    """
-
+    """Yield all candidate X.509 credentials we can find."""
     # -- check environment variables
     # unlike the default paths below, here we don't pre-check that the
     # files actually exist; this allows the validation to fail and the
