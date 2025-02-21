@@ -11,19 +11,26 @@ import os
 from pathlib import Path
 from unittest import mock
 
+try:
+    from contextlib import nullcontext
+except ImportError:  # Python < 3.7
+    from contextlib import contextmanager
+
+    @contextmanager
+    def nullcontext(enter_result=None):
+        yield enter_result
+
+import pytest
 from cryptography import x509
-from cryptography.x509.oid import NameOID
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import (
     hashes,
     serialization,
 )
-
-import pytest
+from cryptography.x509.oid import NameOID
 
 from .. import x509 as igwn_x509
 from ..error import IgwnAuthError
-
 
 # -- fixtures ---------------
 
@@ -104,7 +111,6 @@ def test_is_valid_certificate_false(tmp_path):
 def test_find_credentials_x509usercertkey(x509cert_path, public_pem_path):
     """Test that `find_credentials()` returns the X509_USER_{CERT,KEY} pair
     """
-    os.environ.pop("X509_USER_PROXY", "test")  # make sure this doesn't win
     # configure the environment to return (cert, key)
     x509cert_filename = str(x509cert_path)
     x509key_filename = str(public_pem_path)
@@ -149,14 +155,19 @@ def test_find_credentials_default(_default_cert_path, x509cert_path):
     "os.environ",
 )
 @mock.patch(
-    "igwn_auth_utils.x509.is_valid_certificate",
+    "igwn_auth_utils.x509.validate_certificate",
+    return_value=True,
+)
+@mock.patch(
+    "pathlib.Path.exists",
     side_effect=(
-        False,  # fail for _default_cert_path
-        True,  # so that ~/.globus/usercert.pem passes
+        False,  # default path
+        True,  # usercert.pem
+        True,  # userkey.pem
     ),
 )
-@mock.patch("os.access", return_value=True)
-def test_find_credentials_globus(_, x509cert_path):
+@mock.patch("builtins.open", mock.mock_open())
+def test_find_credentials_globus(mock_exists, mock_valid):
     """Test that .globus files are returned if all else fails
     """
     # clear X509 variables out of the environment
@@ -165,14 +176,17 @@ def test_find_credentials_globus(_, x509cert_path):
 
     # check that .globus is found
     globusdir = Path.home() / ".globus"
-    assert igwn_x509.find_credentials() == (
+    assert igwn_x509.find_credentials(on_error="raise") == (
         str(globusdir / "usercert.pem"),
         str(globusdir / "userkey.pem"),
     )
 
 
 @mock.patch.dict("os.environ")
-@mock.patch("igwn_auth_utils.x509.is_valid_certificate", return_value=False)
+@mock.patch(
+    "igwn_auth_utils.x509.validate_certificate",
+    side_effect=ValueError,
+)
 def test_find_credentials_error(_):
     """Test that a failure in discovering X.509 creds raises the right error
     """
@@ -185,4 +199,46 @@ def test_find_credentials_error(_):
         IgwnAuthError,
         match="could not find an RFC-3820 compliant X.509 credential",
     ):
-        igwn_x509.find_credentials()
+        igwn_x509.find_credentials(on_error="ignore")
+
+
+@mock.patch.dict("os.environ")
+@pytest.mark.parametrize(("on_error", "ctx"), [
+    # no warnings, no errors
+    ("ignore", nullcontext()),
+    # a warning about validation
+    ("warn", pytest.warns(
+        UserWarning,
+        match="^Failed to validate",
+    )),
+    # an exception about validation
+    ("raise", pytest.raises(
+        IgwnAuthError,
+        match="^Failed to validate",
+    )),
+])
+def test_find_credentials_on_error(
+    on_error,
+    ctx,
+    x509cert_path,
+    tmp_path,
+):
+    """Test that the ``on_error`` keyword to `find_credentials()`
+    responds correctly in all cases.
+    """
+    # set cert and key to empty files that fail certificate validation
+    empty = tmp_path / "blah"
+    empty.touch()
+    os.environ["X509_USER_CERT"] = os.environ["X509_USER_KEY"] = str(empty)
+
+    # set the PROXY variable to a valid X.509 credential
+    x509cert_filename = str(x509cert_path)
+    os.environ["X509_USER_PROXY"] = x509cert_filename
+
+    # attempt to find the cred
+    with ctx:
+        cred = igwn_x509.find_credentials(on_error=on_error)
+
+    # check that when we don't raise an exception the result is still correct
+    if on_error in ("warn", "ignore"):
+        assert cred == x509cert_filename
