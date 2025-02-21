@@ -22,6 +22,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.linkcode",
     "sphinx.ext.napoleon",
+    "sphinx_automodapi.automodapi",
     "sphinx_copybutton",
 ]
 default_role = "obj"
@@ -29,11 +30,15 @@ default_role = "obj"
 # -- theme options ----------
 
 html_theme = "furo"
+html_title = f"{project} {version}"
 templates_path = [
     "_templates",
 ]
 
 # -- extensions -------------
+
+# automodapi
+automodapi_inherited_members = False
 
 # autosummary
 autosummary_generate = True
@@ -46,12 +51,14 @@ autodoc_default_flags = [
 
 # intersphinx
 intersphinx_mapping = {
+    "cryptography": ("https://cryptography.io/en/stable", None),
     "python": ("https://docs.python.org/", None),
     "requests": ("https://requests.readthedocs.io/en/stable/", None),
     "requests-gracedb": (
         "https://requests-gracedb.readthedocs.io/en/stable/",
         None,
     ),
+    "scitokens": ("https://scitokens.readthedocs.io/en/stable/", None),
 }
 
 # linkcode

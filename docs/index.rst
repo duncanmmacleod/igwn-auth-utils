@@ -2,11 +2,6 @@
 `igwn-auth-utils`
 #################
 
-.. toctree::
-   :hidden:
-
-   igwn-auth-utils <self>
-
 Python library functions to simplify using `IGWN <https://www.ligo.org>`__
 authorisation credentials.
 
@@ -43,17 +38,26 @@ Documentation
 =============
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Using credentials
+    :maxdepth: 1
+    :caption: Using credentials
 
-   HTTP(S) requests <requests>
+    HTTP(S) requests <requests>
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Credential utilities
+    :maxdepth: 1
+    :caption: Credential utilities
 
-   SciTokens <scitokens>
-   X.509 <x509>
+    SciTokens <scitokens>
+    X.509 <x509>
+
+.. toctree::
+    :maxdepth: 1
+    :caption: API reference
+
+    api/igwn_auth_utils
+    api/igwn_auth_utils.requests
+    api/igwn_auth_utils.scitokens
+    api/igwn_auth_utils.x509
 
 =======
 Support

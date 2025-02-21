@@ -41,7 +41,11 @@ pip-delete-this-directory.txt
 
 # Sphinx documentation
 /docs/_build
-/docs/api/
+/docs/api/*.rst
+!/docs/api/igwn_auth_utils.rst
+!/docs/api/igwn_auth_utils.requests.rst
+!/docs/api/igwn_auth_utils.scitokens.rst
+!/docs/api/igwn_auth_utils.x509.rst
 
 # OS/editor files
 *.swp

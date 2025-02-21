@@ -49,6 +49,7 @@ dynamic = [
 docs = [
   "furo",
   "Sphinx >= 4.0.0",
+  "sphinx-automodapi",
   "sphinx-copybutton",
   "sphinx-github-style",
 ]
