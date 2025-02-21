@@ -102,23 +102,12 @@ filterwarnings = [
 # -- ruff
 
 [tool.ruff.lint]
-select = [
-  # mccabe
-  "C90",
-  # pycodestyle errors
-  "E",
-  # flake8-executable
-  "EXE",
-  # pyflakes
-  "F",
-  # isort
-  "I",
-  # pep8-naming
-  "N",
-  # pyupgrade
-  "UP",
-  # pycodestyle warnings
-  "W",
+# enable all ruff checks:
+select = ["ALL"]
+# selectively disable:
+ignore = [
+  # type annotations (not implemented yet)
+  "ANN",
 ]
 
 [tool.ruff.lint.isort]
@@ -130,6 +119,17 @@ force-wrap-aliases = true
   "F401",  # unused-import
   "F403",  # undefined-local-with-import-star
 ]
+"docs/*" = [
+  "A",  # builtins
+  "D",  # docstrings
+  "INP001",  # implicit namespace package
+]
+"*/tests/*" = [
+  "S101",  # assert
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
 
 # -- setuptools
 
