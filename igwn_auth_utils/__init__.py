@@ -1,6 +1,12 @@
 # Copyright 2021-2022 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
+"""Utilities to simplify using IGWN authorisation credentials.
+
+This project is primarily aimed at discovering X.509 credentials and
+SciTokens for use with HTTP(S) requests to IGWN-operated services.
+"""
+
 __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 __credits__ = "Duncan Brown, Leo Singer"
 __license__ = "BSD-3-Clause"
