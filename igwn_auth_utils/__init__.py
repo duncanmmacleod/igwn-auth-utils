@@ -26,4 +26,4 @@ from .x509 import (
 try:  # parse version
     from ._version import version as __version__
 except ModuleNotFoundError:  # development mode
-    __version__ = ''
+    __version__ = 'dev'
