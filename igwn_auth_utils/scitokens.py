@@ -1,8 +1,7 @@
 # Copyright 2021 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
-"""Utility functions for discovering valid scitokens
-"""
+"""Utility functions for discovering valid scitokens."""
 
 __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 
@@ -37,8 +36,8 @@ WINDOWS = os.name == "nt"
 # -- utilities --------------
 
 class Enforcer(_Enforcer):
-    """Custom `scitokens.Enforcer for IGWN Auth Utils`.
-    """
+    """Custom `scitokens.Enforcer for IGWN Auth Utils`."""
+
     def __init__(self, *args, timeleft=0, **kwargs):
         super().__init__(*args, **kwargs)
         self._timeleft = timeleft
@@ -208,7 +207,7 @@ def deserialize_token(raw, **kwargs):
     token : `scitokens.SciToken`
         the deserialised token
 
-    See also
+    See Also
     --------
     scitokens.SciToken.deserialize
         The underlying deserialisation implementation.
@@ -249,7 +248,7 @@ def load_token_file(path, **kwargs):
 
     >>> load_token('mytoken', audience="my.service.org")
 
-    See also
+    See Also
     --------
     scitokens.SciToken.deserialize
         for details of the deserialisation, and any valid keyword arguments
@@ -310,7 +309,7 @@ def find_token(
     ~igwn_auth_utils.IgwnAuthError
         if no valid token can be found
 
-    See also
+    See Also
     --------
     scitokens.SciToken.deserialize
         for details of the deserialisation, and any valid keyword arguments
@@ -349,7 +348,7 @@ def find_token(
 
 
 def _find_tokens(**deserialize_kwargs):
-    """Yield all tokens that we can find
+    """Yield all tokens that we can find.
 
     This function will `yield` exceptions that are raised when
     attempting to parse a token that was actually found, so that
@@ -392,8 +391,7 @@ def _find_tokens(**deserialize_kwargs):
 
 
 def _find_condor_creds_token_paths():
-    """Find all token files in the condor creds directory
-    """
+    """Find all token files in the condor creds directory."""
     try:
         _condor_creds_dir = Path(os.environ["_CONDOR_CREDS"])
     except KeyError:
