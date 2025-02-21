@@ -1,8 +1,7 @@
 # Copyright 2021 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
-"""Tests for :mod:`igwn_auth_utils.x509`.
-"""
+"""Tests for :mod:`igwn_auth_utils.x509`."""
 
 __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 
@@ -109,8 +108,7 @@ def test_is_valid_certificate_false(tmp_path):
 
 @mock.patch.dict("os.environ")
 def test_find_credentials_x509usercertkey(x509cert_path, public_pem_path):
-    """Test that `find_credentials()` returns the X509_USER_{CERT,KEY} pair
-    """
+    """Test that `find_credentials()` returns the X509_USER_{CERT,KEY} pair."""
     # configure the environment to return (cert, key)
     x509cert_filename = str(x509cert_path)
     x509key_filename = str(public_pem_path)
@@ -126,9 +124,9 @@ def test_find_credentials_x509usercertkey(x509cert_path, public_pem_path):
 
 @mock.patch.dict("os.environ")
 def test_find_credentials_x509userproxy(x509cert_path):
-    """Test that `find_credentials()` returns the X509_USER_PROXY if set
+    """Test that `find_credentials()` returns the ``X509_USER_PROXY`` if set.
 
-    ... if X509_USER_{CERT,KEY} are not set
+    When ``X509_USER_{CERT,KEY}`` are not set
     """
     # remove CERT,KEY so that PROXY can win
     os.environ.pop("X509_USER_CERT", None)
@@ -143,9 +141,9 @@ def test_find_credentials_x509userproxy(x509cert_path):
 @mock.patch.dict("os.environ", clear=True)
 @mock.patch("igwn_auth_utils.x509._default_cert_path")
 def test_find_credentials_default(_default_cert_path, x509cert_path):
-    """Test that `find_credentials()` returns the default path
+    """Test that `find_credentials()` returns the default path.
 
-    ... if none of the X509_USER variable are set
+    When none of the X509_USER variable are set.
     """
     _default_cert_path.return_value = x509cert_path
     assert igwn_x509.find_credentials() == str(x509cert_path)
@@ -168,8 +166,7 @@ def test_find_credentials_default(_default_cert_path, x509cert_path):
 )
 @mock.patch("builtins.open", mock.mock_open())
 def test_find_credentials_globus(mock_exists, mock_valid):
-    """Test that .globus files are returned if all else fails
-    """
+    """Test that .globus files are returned if all else fails."""
     # clear X509 variables out of the environment
     for suffix in ("PROXY", "CERT", "KEY"):
         os.environ.pop(f"X509_USER_{suffix}", None)
@@ -188,8 +185,7 @@ def test_find_credentials_globus(mock_exists, mock_valid):
     side_effect=ValueError,
 )
 def test_find_credentials_error(_):
-    """Test that a failure in discovering X.509 creds raises the right error
-    """
+    """Test that a failure in discovering X.509 creds raises the right error."""
     # clear X509 variables out of the environment
     for suffix in ("PROXY", "CERT", "KEY"):
         os.environ.pop(f"X509_USER_{suffix}", None)
@@ -223,9 +219,7 @@ def test_find_credentials_on_error(
     x509cert_path,
     tmp_path,
 ):
-    """Test that the ``on_error`` keyword to `find_credentials()`
-    responds correctly in all cases.
-    """
+    """Test that `find_credentials` uses ``on_error`` correctly."""
     # set cert and key to empty files that fail certificate validation
     empty = tmp_path / "blah"
     empty.touch()

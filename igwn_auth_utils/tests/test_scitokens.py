@@ -1,8 +1,7 @@
 # Copyright 2021 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
-"""Tests for :mod:`igwn_auth_utils.scitokens`.
-"""
+"""Tests for :mod:`igwn_auth_utils.scitokens`."""
 
 __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 
@@ -41,8 +40,7 @@ def _create_token(
     scope=READ_SCOPE,
     **kwargs
 ):
-    """Create a token
-    """
+    """Create a token."""
     if key:
         from scitokens.utils.keycache import KeyCache
         keycache = KeyCache.getinstance()
@@ -152,8 +150,7 @@ def test_is_valid_token(rtoken, scope, validity):
     (["something", "somethingelse"], False)  # multiple issuers with mismatch
 ))
 def test_is_valid_token_issuers(rtoken, issuer, validity):
-    """Test that `is_valid_token` works with various ``issuer`` inputs.
-    """
+    """Test that `is_valid_token` works with various ``issuer`` inputs."""
     assert igwn_scitokens.is_valid_token(
         rtoken,
         READ_AUDIENCE,
@@ -211,9 +208,7 @@ def test_is_valid_token_serialized_false():
     ("other", False),
 ])
 def test_is_valid_token_issuer(rtoken, issuer, result):
-    """Test that `igwn_auth_utils.scitokens.is_valid_token` enforces
-    ``issuer`` properly.
-    """
+    """Test that `is_valid_token` enforces ``issuer`` properly."""
     assert igwn_scitokens.is_valid_token(
         rtoken,
         READ_AUDIENCE,
@@ -245,8 +240,7 @@ def test_is_valid_token_invalidauthorizationresources(private_key):
     (1e6, False),
 ])
 def test_is_valid_token_timeleft(rtoken, timeleft, result):
-    """Check that `is_valid_token` handles ``timeleft`` correctly.
-    """
+    """Check that `is_valid_token` handles ``timeleft`` correctly."""
     assert igwn_scitokens.is_valid_token(
         rtoken,
         READ_AUDIENCE,
@@ -257,8 +251,7 @@ def test_is_valid_token_timeleft(rtoken, timeleft, result):
 
 
 def test_is_valid_token_warn(rtoken):
-    """Check that `is_valid_token` emits warnings when asked.
-    """
+    """Check that `is_valid_token` emits warnings when asked."""
     with pytest.warns(
         UserWarning,
         match=f"Validator rejected value of '{rtoken['iss']}' for claim 'iss'",
@@ -405,8 +398,7 @@ def test_find_token_error(rtoken, public_pem, audience, msg):
     (True, "could not find a valid SciToken"),
 ))
 def test_find_token_skip_errors(rtoken, skip_errors, message):
-    """Check that the ``skip_errors`` keyword for `find_token()` works
-    """
+    """Check that the ``skip_errors`` keyword for `find_token()` works."""
     # configure a valid token (wrong claims) **HOWEVER**
     # don't add the necessary keyword arguments that would
     # enable `deserialize` to actually work
@@ -448,16 +440,18 @@ def test_find_token_warn(rtoken, rtoken_path, public_pem):
 
 @mock.patch.dict("os.environ")
 def test_find_condor_creds_no_env(tmp_path):
-    """Check that `_find_condor_creds_token_paths()` handles missing
-    ``_CONDOR_CREDS`` environment variable
+    """Check that `_find_condor_creds_token_paths()` handles missing creds.
+
+    When the ``_CONDOR_CREDS`` environment variable is not present.
     """
     assert not list(igwn_scitokens._find_condor_creds_token_paths())
 
 
 @mock.patch.dict("os.environ")
 def test_find_condor_creds_dir_missing(tmp_path):
-    """Check that `_find_condor_creds_token_paths()` handles
-    ``_CONDOR_CREDS`` pointing at a directory that doesn't exist
+    """Check that `_find_condor_creds_token_paths()` handles missing creds.
+
+    When ``_CONDOR_CREDS`` points at a directory that doesn't exist.
     """
     os.environ["_CONDOR_CREDS"] = str(tmp_path / "_condor_creds")
     assert not list(igwn_scitokens._find_condor_creds_token_paths())
@@ -465,16 +459,16 @@ def test_find_condor_creds_dir_missing(tmp_path):
 
 @mock.patch.dict("os.environ")
 def test_find_condor_creds_dir_empty(tmp_path):
-    """Check that `_find_condor_creds_token_paths()` handles
-    ``_CONDOR_CREDS`` pointing at an empty directory
+    """Check that `_find_condor_creds_token_paths()` handles missing creds.
+
+    When ``_CONDOR_CREDS`` points at an empty directory.
     """
     os.environ["_CONDOR_CREDS"] = str(tmp_path)
     assert not list(igwn_scitokens._find_condor_creds_token_paths())
 
 
 def test_token_authorization_header(rtoken):
-    """Check that `token_authorization_header` works
-    """
+    """Check that `token_authorization_header` works."""
     expected = "Bearer {}".format(rtoken.serialize().decode("utf-8"))
 
     # reset _serialized_token attribute

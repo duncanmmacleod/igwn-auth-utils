@@ -1,8 +1,7 @@
 # Copyright 2021-2022 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
-"""Tests for :mod:`igwn_auth_utils.requests`.
-"""
+"""Tests for :mod:`igwn_auth_utils.requests`."""
 
 __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 __credits__ = "Leo Singer <leo.singer@ligo.org>"
@@ -146,8 +145,7 @@ class TestHTTPSciTokenAuth:
 
     @mock.patch("igwn_auth_utils.requests.find_scitoken")
     def test_token_header_empty(self, find_token):  # noqa: F811
-        """Test that the auth class handles no tokens properly.
-        """
+        """Test that the auth class handles no tokens properly."""
         find_token.return_value = None
         req = MockRequest()
         auth = self.Auth()
@@ -155,9 +153,7 @@ class TestHTTPSciTokenAuth:
 
     @mock.patch("igwn_auth_utils.requests.find_scitoken")
     def test_token_header(self, find_token, rtoken):  # noqa: F811
-        """Test that the auth class finds the token and serialises
-        it into a header properly.
-        """
+        """Test token header serialization."""
         find_token.return_value = rtoken
 
         auth = self.Auth()
@@ -192,15 +188,12 @@ class TestSession:
     # -- session auth
 
     def test_noauth_args(self):
-        """Test that `Session(force_noauth=True, fail_if_noauth=True)`
-        is invalid.
-        """
+        """Test that `Session(force_noauth=True, fail_if_noauth=True)` is invalid."""
         with pytest.raises(ValueError):
             self.Session(force_noauth=True, fail_if_noauth=True)
 
     def test_fail_if_noauth(self):
-        """Test that `Session(fail_if_noauth=True)` raises an error
-        """
+        """Test that `Session(fail_if_noauth=True)` raises an error."""
         with pytest.raises(IgwnAuthError):
             self.Session(
                 token=False,
@@ -210,8 +203,7 @@ class TestSession:
             )
 
     def test_force_noauth(self):
-        """Test that `Session(force_noauth=True)` overrides auth kwargs
-        """
+        """Test that `Session(force_noauth=True)` overrides auth kwargs."""
         sess = self.Session(cert="cert.pem", force_noauth=True)
         assert sess.cert is False
         assert sess.auth is None
@@ -219,8 +211,7 @@ class TestSession:
     @mock_no_scitoken()
     @mock_no_x509()
     def test_defaults(self):
-        """Test that the `Session()` defaults work in a noauth environment
-        """
+        """Test that the `Session()` defaults work in a noauth environment."""
         sess = self.Session()
         assert sess.cert is None
         assert isinstance(sess.auth, igwn_requests.HTTPSciTokenAuth)
@@ -229,8 +220,7 @@ class TestSession:
     # -- tokens
 
     def test_token_explicit(self, rtoken):  # noqa: F811
-        """Test that tokens are handled properly
-        """
+        """Test that tokens are handled properly."""
         sess = self.Session(token=rtoken)
         assert sess.auth.token is rtoken
         # mock the request to get the header that would be used
@@ -241,8 +231,7 @@ class TestSession:
         )
 
     def test_token_serialized(self, rtoken):  # noqa: F811
-        """Test that serialized tokens are handled properly
-        """
+        """Test that serialized tokens are handled properly."""
         serialized = rtoken.serialize()
         sess = self.Session(token=serialized)
         req = MockRequest()
@@ -274,8 +263,7 @@ class TestSession:
     ))
     @mock.patch("igwn_auth_utils.requests.find_scitoken")
     def test_token_audience_default(self, find_scitoken, url, aud):
-        """Check that the default `token_audience` is set correctly.
-        """
+        """Check that the default `token_audience` is set correctly."""
         sess = self.Session(
             url=url,
             token=True,
@@ -287,8 +275,7 @@ class TestSession:
     # -- X.509
 
     def test_cert_explicit(self):
-        """Test that cert credentials are stored properly
-        """
+        """Test that cert credentials are stored properly."""
         sess = self.Session(token=False, cert="cert.pem")
         assert sess.cert == "cert.pem"
         assert sess.auth is None
@@ -298,8 +285,7 @@ class TestSession:
         return_value="test.pem",
     )
     def test_cert_discovery(self, _):
-        """Test that automatic certificate discovery works
-        """
+        """Test that automatic certificate discovery works."""
         assert self.Session(token=False).cert == "test.pem"
 
     @mock.patch(
@@ -346,7 +332,7 @@ class TestSession:
         token,
         auth,
     ):
-        """Check that Session._init_auth records all auth options
+        """Check that Session._init_auth records all auth options.
 
         In case a remote host accepts X.509 but not tokens, but the user
         has a valid ANY token (for example).
@@ -385,8 +371,7 @@ class TestSession:
         requests_mock,
         tmp_path,
     ):
-        """Test that a request does its own search for an X.509 cert.
-        """
+        """Test that a request does its own search for an X.509 cert."""
         x509 = tmp_path / "x509"
         requests_mock.get("https://example.com")
         with mock.patch.dict(os.environ):
@@ -421,8 +406,7 @@ class TestSession:
         request_aud,
         request_scope,
     ):
-        """Test that a request correctly merges token claim settings.
-        """
+        """Test that a request correctly merges token claim settings."""
         requests_mock.get("https://example.com/api")
         with self.Session(
             cert=False,
@@ -456,8 +440,7 @@ class TestSession:
 
     @mock.patch("igwn_auth_utils.requests.find_scitoken", return_value=None)
     def test_request_fail_if_noauth(self, find_scitoken):
-        """Test that `Session.get(fail_if_noauth=True)` raises an error.
-        """
+        """Test that `Session.get(fail_if_noauth=True)` raises an error."""
         with self.Session(fail_if_noauth=False) as sess, \
              pytest.raises(IgwnAuthError, match="no valid authorisation"):
             sess.get(
@@ -488,8 +471,7 @@ class TestSession:
 # -- standalone requests --------------
 
 def test_get(requests_mock):
-    """Test that `igwn_auth_utils.requests.get` can perform a simple request
-    """
+    """Test that `igwn_auth_utils.requests.get` can perform a simple request."""
     requests_mock.get(
         "https://test.org",
         text="TEST",
@@ -499,8 +481,7 @@ def test_get(requests_mock):
 
 @mock.patch("igwn_auth_utils.requests.HTTPSciTokenAuth.__call__")
 def test_get_token_false(token_auth_call, requests_mock):
-    """Test that `igwn_auth_utils.requests.get` respects token=False.
-    """
+    """Test that `igwn_auth_utils.requests.get` respects token=False."""
     requests_mock.get(
         "https://test.org",
         text="TEST",
@@ -512,8 +493,7 @@ def test_get_token_false(token_auth_call, requests_mock):
 
 @mock.patch("igwn_auth_utils.requests.Session")
 def test_get_session(mock_session):
-    """Test that ``session`` for `igwn_auth_utils.requests.get` works
-    """
+    """Test that ``session`` for `igwn_auth_utils.requests.get` works."""
     session = mock.MagicMock()
     assert igwn_requests.get("https://test.org", session=session)
     session.request.assert_called_once_with("get", "https://test.org")
@@ -534,8 +514,7 @@ def test_get_force_noauth(find_x509, find_scitoken, requests_mock):
 
 
 def test_post(requests_mock):
-    """Test that `igwn_auth_utils.requests.post` can perform a simple request.
-    """
+    """Test that `igwn_auth_utils.requests.post` can perform a simple request."""
     data = {"a": 1, "b": 2}
     requests_mock.post(
         "https://example.com",
