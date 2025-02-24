@@ -7,6 +7,9 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+*.dist-info/
+*.egg-info/
+.eggs/
 env/
 build/
 develop-eggs/
@@ -17,21 +20,16 @@ lib64/
 parts/
 sdist/
 var/
-*.egg-info/
-.installed.cfg
 *.egg
+.installed.cfg
 MANIFEST
-Portfile
-.eggs/
+requirements.txt
 /igwn_auth_utils/_version.py
 
 # Debian packaging files
-/debian/.debhelper/
-/debian/*.debhelper.log
-/debian/*.postinst.debhelper
-/debian/*.prerm.debhelper
+/debian/*debhelper*
 /debian/*.substvars
-/debian/*gwosc/
+/debian/*igwn-auth-utils/
 /debian/files
 /.pybuild/
 
