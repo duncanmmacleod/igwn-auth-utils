@@ -1,4 +1,4 @@
-# -- gwosc source package ------------------------------------------------------
+# -- igwn-auth-utils source package ------------------------------------------
 
 Source: igwn-auth-utils
 Homepage: https://igwn-auth-utils.readthedocs.io
@@ -18,7 +18,7 @@ Build-Depends:
  python3-setuptools-scm,
  python3-wheel,
 
-# -- python3-igwn-auth-utils ---------------------------------------------------
+# -- python3-igwn-auth-utils -------------------------------------------------
 
 Package: python3-igwn-auth-utils
 Architecture: all
