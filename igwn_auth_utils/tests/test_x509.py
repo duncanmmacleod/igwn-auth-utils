@@ -27,9 +27,12 @@ from cryptography.hazmat.primitives import (
     serialization,
 )
 from cryptography.x509.oid import NameOID
+from packaging.version import Version
 
 from .. import x509 as igwn_x509
 from ..error import IgwnAuthError
+
+PYTEST_LT_8 = Version(pytest.__version__) < Version("8.0.0")
 
 x509_warning_ctx = pytest.warns(
     DeprecationWarning,
@@ -239,8 +242,14 @@ def test_find_credentials_on_error(
     x509cert_filename = str(x509cert_path)
     os.environ["X509_USER_PROXY"] = x509cert_filename
 
+    if PYTEST_LT_8 and on_error == "warn":
+        # pytest < 8 doesn't handle stacking warn context managers
+        _x509_warning_ctx = nullcontext()
+    else:
+        _x509_warning_ctx = x509_warning_ctx
+
     # attempt to find the cred
-    with x509_warning_ctx, ctx:
+    with _x509_warning_ctx, ctx:
         cred = igwn_x509.find_credentials(on_error=on_error)
 
     # check that when we don't raise an exception the result is still correct
