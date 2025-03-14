@@ -81,11 +81,26 @@ source = [
 ]
 
 [tool.coverage.report]
+exclude_lines = [
+  # ignore when asked
+  "pragma: no( |-)cover",
+  # don't complain about typing blocks
+  "if (typing\\.)?TYPE_CHECKING",
+]
 omit = [
   "*/_version.py",
 ]
 # print report with one decimal point
 precision = 1
+
+# -- mypy
+
+[tool.mypy]
+check_untyped_defs = true
+exclude = [
+  "^docs/",
+]
+ignore_missing_imports = true
 
 # -- pytest
 
@@ -102,12 +117,14 @@ filterwarnings = [
 # -- ruff
 
 [tool.ruff.lint]
-# enable all ruff checks:
 select = ["ALL"]
-# selectively disable:
 ignore = [
-  # type annotations (not implemented yet)
-  "ANN",
+  "ANN003",  # type annotations for **kwargs
+  "D203",  # blank line before class docstring
+  "D213",  # docstring summary on second line
+  "D413",  # blank line after last section
+  "PLR0913",  # too many arguments
+  "SIM108",  # if-else instead of ternary if
 ]
 
 [tool.ruff.lint.isort]
@@ -119,20 +136,18 @@ force-wrap-aliases = true
   "F401",  # unused-import
   "F403",  # undefined-local-with-import-star
 ]
-"docs/*" = [
-  "A",  # builtins
-  "D",  # docstrings
-  "INP001",  # implicit namespace package
-]
 "*/tests/*" = [
+  "ANN",  # type annotations
+  "B904",  # raise from
+  "EM101",  # string literal in exception
+  "PLR2004",  # magic value used in comparison
   "S101",  # assert
 ]
-
-[tool.ruff.lint.pydocstyle]
-convention = "numpy"
-ignore-decorators = [
-  "functools.wraps",
-  "typing.overload",
+"docs/*" = [
+  "A",  # builtins
+  "ANN",  # type annotations
+  "D",  # docstrings
+  "INP001",  # implicit namespace package
 ]
 
 # -- setuptools
