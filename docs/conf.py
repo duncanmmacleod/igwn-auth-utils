@@ -51,6 +51,7 @@ autodoc_default_flags = [
 # intersphinx
 intersphinx_mapping = {
     "cryptography": ("https://cryptography.io/en/stable", None),
+    "gssapi": ("https://pythongssapi.github.io/python-gssapi/", None),
     "python": ("https://docs.python.org/", None),
     "requests": ("https://requests.readthedocs.io/en/stable/", None),
     "requests-gracedb": (
