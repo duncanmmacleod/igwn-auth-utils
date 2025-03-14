@@ -31,6 +31,12 @@ from cryptography.x509.oid import NameOID
 from .. import x509 as igwn_x509
 from ..error import IgwnAuthError
 
+x509_warning_ctx = pytest.warns(
+    DeprecationWarning,
+    match="Support for identity-based X.509 credentials",
+)
+
+
 # -- fixtures ---------------
 
 @pytest.fixture
@@ -116,10 +122,11 @@ def test_find_credentials_x509usercertkey(x509cert_path, public_pem_path):
     os.environ["X509_USER_KEY"] = x509key_filename
 
     # check that find_credentials() returns the (cert, key) pair
-    assert igwn_x509.find_credentials() == (
-        x509cert_filename,
-        x509key_filename,
-    )
+    with x509_warning_ctx:
+        assert igwn_x509.find_credentials() == (
+            x509cert_filename,
+            x509key_filename,
+        )
 
 
 @mock.patch.dict("os.environ")
@@ -135,7 +142,8 @@ def test_find_credentials_x509userproxy(x509cert_path):
     x509cert_filename = str(x509cert_path)
     os.environ["X509_USER_PROXY"] = x509cert_filename
     # make sure it gets found
-    assert igwn_x509.find_credentials() == x509cert_filename
+    with x509_warning_ctx:
+        assert igwn_x509.find_credentials() == x509cert_filename
 
 
 @mock.patch.dict("os.environ", clear=True)
@@ -146,7 +154,8 @@ def test_find_credentials_default(_default_cert_path, x509cert_path):
     When none of the X509_USER variable are set.
     """
     _default_cert_path.return_value = x509cert_path
-    assert igwn_x509.find_credentials() == str(x509cert_path)
+    with x509_warning_ctx:
+        assert igwn_x509.find_credentials() == str(x509cert_path)
 
 
 @mock.patch.dict(
@@ -173,7 +182,8 @@ def test_find_credentials_globus(mock_exists, mock_valid):
 
     # check that .globus is found
     globusdir = Path.home() / ".globus"
-    assert igwn_x509.find_credentials(on_error="raise") == (
+    with x509_warning_ctx:
+        assert igwn_x509.find_credentials(on_error="raise") == (
         str(globusdir / "usercert.pem"),
         str(globusdir / "userkey.pem"),
     )
@@ -191,7 +201,7 @@ def test_find_credentials_error(_):
         os.environ.pop(f"X509_USER_{suffix}", None)
 
     # check that we can't find any credentials
-    with pytest.raises(
+    with x509_warning_ctx, pytest.raises(
         IgwnAuthError,
         match="could not find an RFC-3820 compliant X.509 credential",
     ):
@@ -230,7 +240,7 @@ def test_find_credentials_on_error(
     os.environ["X509_USER_PROXY"] = x509cert_filename
 
     # attempt to find the cred
-    with ctx:
+    with x509_warning_ctx, ctx:
         cred = igwn_x509.find_credentials(on_error=on_error)
 
     # check that when we don't raise an exception the result is still correct
