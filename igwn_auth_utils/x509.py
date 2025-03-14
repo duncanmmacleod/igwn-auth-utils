@@ -6,7 +6,10 @@
 import datetime
 import os
 import warnings
+import sys
+from functools import wraps
 from pathlib import Path
+from textwrap import indent
 
 from cryptography.x509 import (
     Certificate,
@@ -15,6 +18,53 @@ from cryptography.x509 import (
 from cryptography.hazmat.backends import default_backend
 
 from .error import IgwnAuthError
+
+X509_DEPRECATION_MESSAGE = """
+Support for identity-based X.509 credentials for LIGO.ORG is being dropped.
+Calls to this utility will stop working on/around 20 May 2025.
+
+For details on this change please see
+
+https://computing.docs.ligo.org/guide/compsoft/roadmap/LVK/x509_retirement/
+
+If you have questions about this message, or its implications, please
+consider opening an IGWN Computing Help Desk ticket:
+
+https://git.ligo.org/computing/helpdesk/-/issues/new
+""".strip()
+X509_DEPRECATION_DOCSTRING_WARNING = f"""
+.. warning::
+
+{indent(X509_DEPRECATION_MESSAGE, '    ')}"""
+if sys.version_info < (3, 13, 0):
+    # older versions don't have https://github.com/python/cpython/issues/81283
+    X509_DEPRECATION_DOCSTRING_WARNING = indent(
+        X509_DEPRECATION_DOCSTRING_WARNING,
+        "    ",
+    )
+
+
+def x509_deprecation(func):
+    """Wrap ``func`` with a warning about X.509 support being dropped."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # warn about X.509 EOL
+        warnings.warn(
+            X509_DEPRECATION_MESSAGE,
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        # call the function
+        return func(*args, **kwargs)
+
+    doclines = wrapper.__doc__.split("\n", 1)
+    wrapper.__doc__ = "\n".join((
+        doclines[0],
+        X509_DEPRECATION_DOCSTRING_WARNING,
+        *doclines[1:],
+    ))
+
+    return wrapper
 
 
 def load_x509_certificate_file(file, backend=None):
@@ -138,6 +188,7 @@ def _globus_cert_path():
     )
 
 
+@x509_deprecation
 def find_credentials(
     timeleft=600,
     on_error="warn",
