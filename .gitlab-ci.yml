@@ -12,6 +12,7 @@ include:
         - "3.11"
         - "3.12"
         - "3.13"
+  - component: $CI_SERVER_FQDN/computing/gitlab/components/python/type-checking@2
 
   # -- Debian packaging --------------
 

@@ -81,11 +81,26 @@ source = [
 ]
 
 [tool.coverage.report]
+exclude_lines = [
+  # ignore when asked
+  "pragma: no( |-)cover",
+  # don't complain about typing blocks
+  "if (typing\\.)?TYPE_CHECKING",
+]
 omit = [
   "*/_version.py",
 ]
 # print report with one decimal point
 precision = 1
+
+# -- mypy
+
+[tool.mypy]
+check_untyped_defs = true
+exclude = [
+  "^docs/",
+]
+ignore_missing_imports = true
 
 # -- pytest
 
