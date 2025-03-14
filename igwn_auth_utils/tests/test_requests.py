@@ -30,6 +30,11 @@ SKIP_REQUESTS_NETRC = pytest.mark.skipif(
     reason=f"requests {requests_version} doesn't respect NETRC env",
 )
 
+x509_warning_ctx = pytest.warns(
+    DeprecationWarning,
+    match="Support for identity-based X.509 credentials",
+)
+
 
 # -- utilities ------------------------
 
@@ -50,8 +55,8 @@ def mock_no_scitoken():
 
 def mock_no_x509():
     return mock.patch(
-        "igwn_auth_utils.requests.find_x509_credentials",
-        _igwnerror,
+        "igwn_auth_utils.x509._find_credentials",
+        _empty,
     )
 
 
@@ -116,7 +121,10 @@ def test_get_netrc_auth_notfound(tmp_path):
 def test_get_netrc_auth_permissions(netrc):
     os.environ["NETRC"] = str(netrc)
     netrc.chmod(0o444)
-    with pytest.raises(NetrcParseError):
+    with pytest.raises(
+        NetrcParseError,
+        match="too permissive",
+    ):
         igwn_requests.get_netrc_auth(None, raise_errors=True)
     assert igwn_requests.get_netrc_auth(None, raise_errors=False) is None
 
@@ -183,18 +191,24 @@ class TestSession:
             RequestException,
             match=r"404 Client Error: not found for url: https://test.org/",
         ):
-            igwn_requests.get("https://test.org")
+            igwn_requests.get("https://test.org", cert=False)
 
     # -- session auth
 
     def test_noauth_args(self):
         """Test that `Session(force_noauth=True, fail_if_noauth=True)` is invalid."""
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            ValueError,
+            match="cannot select both force_noauth and fail_if_noauth",
+        ):
             self.Session(force_noauth=True, fail_if_noauth=True)
 
     def test_fail_if_noauth(self):
         """Test that `Session(fail_if_noauth=True)` raises an error."""
-        with pytest.raises(IgwnAuthError):
+        with pytest.raises(
+            IgwnAuthError,
+            match="no valid authorisation credentials found",
+        ):
             self.Session(
                 token=False,
                 cert=False,
@@ -212,7 +226,8 @@ class TestSession:
     @mock_no_x509()
     def test_defaults(self):
         """Test that the `Session()` defaults work in a noauth environment."""
-        sess = self.Session()
+        with x509_warning_ctx:
+            sess = self.Session()
         assert sess.cert is None
         assert isinstance(sess.auth, igwn_requests.HTTPSciTokenAuth)
         assert sess.auth.token is None
@@ -221,7 +236,7 @@ class TestSession:
 
     def test_token_explicit(self, rtoken):  # noqa: F811
         """Test that tokens are handled properly."""
-        sess = self.Session(token=rtoken)
+        sess = self.Session(token=rtoken, cert=False)
         assert sess.auth.token is rtoken
         # mock the request to get the header that would be used
         req = MockRequest()
@@ -233,7 +248,7 @@ class TestSession:
     def test_token_serialized(self, rtoken):  # noqa: F811
         """Test that serialized tokens are handled properly."""
         serialized = rtoken.serialize()
-        sess = self.Session(token=serialized)
+        sess = self.Session(token=serialized, cert=False)
         req = MockRequest()
         sess.auth(req)
         assert req.headers["Authorization"] == f"Bearer {serialized}"
@@ -243,7 +258,7 @@ class TestSession:
     @mock.patch("igwn_auth_utils.requests.find_scitoken")
     def test_token_discovery(self, find_token, rtoken):  # noqa: F811
         find_token.return_value = rtoken
-        sess = self.Session()
+        sess = self.Session(cert=False)
         sess.auth(sess)
         assert sess.headers["Authorization"] == (
             igwn_requests.scitoken_authorization_header(rtoken)
@@ -251,11 +266,17 @@ class TestSession:
 
     @mock.patch(
         "igwn_auth_utils.requests.find_scitoken",
-        side_effect=IgwnAuthError,
+        side_effect=IgwnAuthError("mock error"),
     )
     def test_token_required_failure(self, _):
-        with pytest.raises(IgwnAuthError), self.Session(token=True) as sess:
-            sess.get("https://example.com")
+        errctx = pytest.raises(
+            IgwnAuthError,
+            match="mock error",
+        )
+        with x509_warning_ctx:
+            sess = self.Session(token=True)
+            with errctx, sess:
+                sess.get("https://example.com")
 
     @pytest.mark.parametrize(("url", "aud"), (
         ("https://secret.example.com:8008", ["https://secret.example.com"]),
@@ -290,10 +311,13 @@ class TestSession:
 
     @mock.patch(
         "igwn_auth_utils.requests.find_x509_credentials",
-        side_effect=IgwnAuthError,
+        side_effect=IgwnAuthError("mock error"),
     )
     def test_cert_required_failure(self, _):
-        with pytest.raises(IgwnAuthError):
+        with pytest.raises(
+            IgwnAuthError,
+            match="mock error",
+        ):
             self.Session(token=False, cert=True)
 
     # -- basic auth
@@ -349,6 +373,7 @@ class TestSession:
     # -- request auth
     # test that Session auth and Request auth play nicely together
 
+    @mock.patch.dict("os.environ")
     @mock.patch(
         "igwn_auth_utils.x509._default_cert_path",
         return_value=Path("does-not-exist"),
@@ -374,8 +399,8 @@ class TestSession:
         """Test that a request does its own search for an X.509 cert."""
         x509 = tmp_path / "x509"
         requests_mock.get("https://example.com")
-        with mock.patch.dict(os.environ):
-            os.environ.pop("X509_USER_PROXY", None)
+        os.environ.pop("X509_USER_PROXY", None)
+        with x509_warning_ctx:
             with self.Session(cert=None) as sess:
                 # check that the Session doesn't have a cert
                 assert sess.cert is None
@@ -441,13 +466,16 @@ class TestSession:
     @mock.patch("igwn_auth_utils.requests.find_scitoken", return_value=None)
     def test_request_fail_if_noauth(self, find_scitoken):
         """Test that `Session.get(fail_if_noauth=True)` raises an error."""
-        with self.Session(fail_if_noauth=False) as sess, \
-             pytest.raises(IgwnAuthError, match="no valid authorisation"):
-            sess.get(
-                "https://example.com",
-                cert=False,
-                fail_if_noauth=True,
-            )
+        with x509_warning_ctx:
+            with self.Session(fail_if_noauth=False) as sess, pytest.raises(
+                IgwnAuthError,
+                match="no valid authorisation",
+            ):
+                sess.get(
+                 "https://example.com",
+                 cert=False,
+                 fail_if_noauth=True,
+             )
 
     @mock.patch("igwn_auth_utils.requests.HTTPSciTokenAuth.__call__")
     def test_request_token_false(self, token_auth_call, requests_mock):
@@ -476,7 +504,10 @@ def test_get(requests_mock):
         "https://test.org",
         text="TEST",
     )
-    assert igwn_requests.get("https://test.org").text == "TEST"
+    assert igwn_requests.get(
+        "https://test.org",
+        cert=False,
+    ).text == "TEST"
 
 
 @mock.patch("igwn_auth_utils.requests.HTTPSciTokenAuth.__call__")
@@ -486,7 +517,7 @@ def test_get_token_false(token_auth_call, requests_mock):
         "https://test.org",
         text="TEST",
     )
-    igwn_requests.get("https://test.org", token=False)
+    igwn_requests.get("https://test.org", token=False, cert=False)
     # assert that HTTPSciTokenAuth is never actually invoked
     token_auth_call.assert_not_called()
 
@@ -524,6 +555,7 @@ def test_post(requests_mock):
     assert igwn_requests.post(
         "https://example.com",
         data=data,
+        cert=False,
     ).text == "THANKS"
     # check that the data was encoded into the request properly
     req = requests_mock.request_history[0]
