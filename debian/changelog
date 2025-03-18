@@ -1,3 +1,9 @@
+igwn-auth-utils (1.2.1-1) unstable; urgency=low
+
+  * update to 1.2.1
+
+ -- Duncan Macleod <duncan.macleod@ligo.org>  Tue, 18 Mar 2025 14:20:00 +0000
+
 igwn-auth-utils (1.2.0-1) unstable; urgency=low
 
   * update to 1.2.0
