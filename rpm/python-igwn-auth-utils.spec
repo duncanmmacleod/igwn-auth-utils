@@ -1,6 +1,6 @@
 %define srcname igwn-auth-utils
 %global distname %{lua:name = string.gsub(rpm.expand("%{srcname}"), "[.-]", "_"); print(name)}
-%define version 1.2.0
+%define version 1.2.1
 %define release 1
 
 Name:      python-%{srcname}
@@ -107,6 +107,9 @@ rm -rf $RPM_BUILD_ROOT
 # -- changelog
 
 %changelog
+* Tue Mar 18 2025 Duncan Macleod <duncan.macleod@ligo.org> - 1.2.1-1
+- update to 1.2.1
+
 * Mon Feb 24 2025 Duncan Macleod <duncan.macleod@ligo.org> - 1.2.0-1
 - update to 1.2.0
 - update requirements versions
