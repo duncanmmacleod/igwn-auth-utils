@@ -9,19 +9,13 @@ command-line tool using the python-gssapi library.
 See the documentation of the `kinit` function for example usage.
 """
 
-from __future__ import annotations
-
 __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 
 import logging
 import os
 import stat
-import typing
 from pathlib import Path
 from unittest import mock
-
-if typing.TYPE_CHECKING:
-    import gssapi
 
 __all__ = [
     "kinit",
@@ -33,7 +27,7 @@ log = logging.getLogger(__name__)
 BAD_KEYTAB_PERMISSIONS = stat.S_IRWXG | stat.S_IRWXO
 
 
-def _check_keytab(keytab: str | Path | None) -> None:
+def _check_keytab(keytab):
     """Check the Kerberos keytab.
 
     This just checks that the keytab has appropriate permissions.
@@ -55,15 +49,15 @@ def _check_keytab(keytab: str | Path | None) -> None:
 
 
 def _keytab_principal(
-    keytab: str | Path,
-) -> gssapi.Name:
+    keytab,
+):
     """Return the principal assocated with a Kerberos keytab file."""
     import gssapi
     with mock.patch.dict("os.environ", {"KRB5_KTNAME": str(keytab)}):
         return gssapi.Credentials(usage="accept").name
 
 
-def _canonical_principal(principal: str) -> gssapi.Name:
+def _canonical_principal(principal):
     """Canonicalise the principal name."""
     import gssapi
 
@@ -85,9 +79,9 @@ def _canonical_principal(principal: str) -> gssapi.Name:
 
 
 def _parse_options(
-    principal: str | gssapi.Name | None,
-    keytab: str | Path | None,
-) -> tuple[gssapi.Name, str]:
+    principal,
+    keytab,
+):
     if keytab is None:
         keytab = os.getenv("KRB5_KTNAME")
     if keytab is None:
@@ -101,10 +95,10 @@ def _parse_options(
 
 
 def kinit(
-    principal: str | gssapi.Name | None = None,
-    keytab: str | Path | None = None,
-    ccache: str | None = None,
-) -> gssapi.Credentials:
+    principal=None,
+    keytab=None,
+    ccache=None,
+):
     """Initialise a Kerberos ticket-granting ticket (TGT).
 
     The method works in the same way as the ``kinit`` command-line tool,
