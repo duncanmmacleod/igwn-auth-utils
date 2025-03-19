@@ -188,6 +188,33 @@ def target_audience(url, include_any=True):
     return aud
 
 
+def token_authorization_header(token, scheme="Bearer"):
+    """Format an in-memory token for use in an HTTP Authorization Header.
+
+    Parameters
+    ----------
+    token : `scitokens.SciToken`
+        the token to format
+
+    scheme : `str` optional
+        the Authorization scheme to use
+
+    Returns
+    -------
+    header_str : `str`
+        formatted content for an `Authorization` header
+
+    Notes
+    -----
+    See `RFC-6750 <https://datatracker.ietf.org/doc/html/rfc6750>`__
+    for details on the ``Bearer`` Authorization token standard.
+    """
+    return "{} {}".format(
+        scheme,
+        token._serialized_token or token.serialize().decode("utf-8"),
+    )
+
+
 # -- I/O --------------------
 
 def deserialize_token(raw, **kwargs):
@@ -402,32 +429,3 @@ def _find_condor_creds_token_paths():
                 yield f
     except FileNotFoundError:   # creds dir doesn't exist
         return
-
-
-# -- HTTP request helper ----
-
-def token_authorization_header(token, scheme="Bearer"):
-    """Format an in-memory token for use in an HTTP Authorization Header.
-
-    Parameters
-    ----------
-    token : `scitokens.SciToken`
-        the token to format
-
-    scheme : `str` optional
-        the Authorization scheme to use
-
-    Returns
-    -------
-    header_str : `str`
-        formatted content for an `Authorization` header
-
-    Notes
-    -----
-    See `RFC-6750 <https://datatracker.ietf.org/doc/html/rfc6750>`__
-    for details on the ``Bearer`` Authorization token standard.
-    """
-    return "{} {}".format(
-        scheme,
-        token._serialized_token or token.serialize().decode("utf-8"),
-    )
