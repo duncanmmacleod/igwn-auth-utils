@@ -59,6 +59,17 @@ include:
 
 # -- customisations ------------------
 
+dependency_scanning:
+  stage: test
+  variables:
+    DEBIAN_FRONTEND: "noninteractive"
+  before_script:
+    # install some underlying utilities using `apt` so that the dependency
+    # scanner can use pip to install everything else
+    - apt-get update -yqq
+    - apt-get install -yqq
+        libkrb5-dev
+
 redhat_test_el8:
   before_script:
     - !reference [redhat_test, before_script]
