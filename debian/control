@@ -25,10 +25,6 @@ Architecture: all
 Depends:
  ${misc:Depends},
  ${python3:Depends},
- python3-cryptography,
- python3-requests,
- python3-safe-netrc (>= 1.0),
- python3-scitokens (>= 1.8),
 Description: Authorisation utilities for IGWN
  Python library functions to simplify using IGWN authorisation credentials.
  This project is primarily aimed at discovering X.509 credentials and

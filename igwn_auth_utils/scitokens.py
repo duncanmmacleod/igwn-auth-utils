@@ -5,7 +5,10 @@
 
 __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 
+import contextlib
+import logging
 import os
+import sys
 import warnings
 from pathlib import Path
 from urllib.parse import urlparse
@@ -23,12 +26,22 @@ from scitokens.scitokens import InvalidAuthorizationResource
 
 from .error import IgwnAuthError
 
+try:
+    from shlex import join as shlex_join
+except ImportError:  # python < 3.8
+    import shlex
+
+    def shlex_join(split):
+        """Backport of `shlex.join` from Python 3.8."""
+        return " ".join(map(shlex.quote, split))
+
+log = logging.getLogger(__name__)
+
 TOKEN_ERROR = (
     InvalidAudienceError,
     InvalidTokenError,
     SciTokensException,
 )
-
 
 WINDOWS = os.name == "nt"
 
@@ -429,3 +442,104 @@ def _find_condor_creds_token_paths():
                 yield f
     except FileNotFoundError:   # creds dir doesn't exist
         return
+
+
+# -- token acquisition ---------------
+
+def _format_argv(**kwargs):
+    """Format arguments for ``htgettoken``."""
+    args = []
+    for key, value in kwargs.items():
+        arg = f"--{key}"
+        if value is False:  # disabled
+            continue
+        if value in (True, None):
+            args.append(arg)
+        else:
+            args.extend((arg, str(value)))
+    return args
+
+
+def default_bearer_token_file(prefix="bt_"):
+    """Return the default location for a bearer token.
+
+    According to the WLCG Bearer Token Discovery protocol.
+    """
+    with contextlib.suppress(KeyError):
+        return os.environ["BEARER_TOKEN_FILE"]
+    if WINDOWS:
+        tokendir = Path(os.environ["SYSTEMROOT"]) / "Temp"
+        user = os.getlogin()
+    else:
+        tokendir = Path(os.getenv("XDG_RUNTIME_DIR", "/tmp"))  # noqa: S108
+        user = f"u{os.getuid()}"
+    return str(tokendir / f"{prefix}{user}")
+
+
+def get_scitoken(
+    *args,
+    outfile=None,
+    minsecs=60,
+    quiet=True,
+    **kwargs,
+):
+    """Get a new SciToken using |htgettoken|_ and return its file location.
+
+    Parameters
+    ----------
+    args
+        All positional arguments are passed as arguments to
+        `htgettoken.main`.
+
+    outfile : `str`, optional
+        The path in which to serialize the new `SciToken`.
+        Default given by :func:`default_bearer_token_file`.
+
+    minsecs : `float`, optional
+        The minimum remaining lifetime to reuse an existing bearer token.
+
+    quiet : `bool`, optional
+        If `True`, supress output from `htgettoken`.
+
+    kwargs
+        All ``key: value`` keyword arguments (including ``minsecs`` and
+        ``quiet``) are passed as ``--key=value`` options to
+        `htgettoken.main`. Keywords with the value `True` are passed simply
+        as ``--key``, while those with the value `False` are omitted.
+
+    Returns
+    -------
+    tokenfile: `str`
+        The path to the bearer token file acquired by `htgettoken`.
+
+    See Also
+    --------
+    igwn_auth_utils.scitokens.default_bearer_token_file
+        For information on the default bearer token path.
+    """
+    import htgettoken
+
+    if not sys.stdout.isatty():
+        # don't prompt if we can't get a response
+        kwargs.setdefault("nooidc", True)
+
+    # parse output file if given
+    if outfile is None:
+        outfile = default_bearer_token_file()
+
+    # get token in a temporary directory
+    argv = list(args) + _format_argv(
+        outfile=outfile,
+        minsecs=minsecs,
+        quiet=quiet,
+        **kwargs,
+    )
+    log.debug("Acquiring SciToken with htgettoken")
+    log.debug("$ htgettoken %s", shlex_join(argv))
+    try:
+        htgettoken.main(argv)
+    except SystemExit as exc:  # bad args
+        msg = "htgettoken failed, see full traceback for details"
+        raise RuntimeError(msg) from exc
+    log.debug("SciToken written to %s", outfile)
+    return outfile

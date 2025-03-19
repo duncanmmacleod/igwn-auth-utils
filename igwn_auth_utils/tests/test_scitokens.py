@@ -480,3 +480,66 @@ def test_token_authorization_header(rtoken):
 
     # do it again to check that the use of _serialized_token attr works
     assert igwn_scitokens.token_authorization_header(rtoken) == a
+
+
+@mock.patch.dict("os.environ", clear=True)
+@mock.patch("os.getuid", int)
+@pytest.mark.skipif(os.name == "nt", reason="skip non-Unix")
+@pytest.mark.parametrize(("env", "result"), [
+    pytest.param(
+        {},
+        "/tmp/bt_u0",  # noqa: S108
+        id="default",
+        marks=[pytest.mark.skipif(os.name == "nt", reason="skip non-Unix")],
+    ),
+    pytest.param(
+        {"BEARER_TOKEN_FILE": "anything"},
+        "anything",
+        id="BEARER_TOKEN_FILE",
+        marks=[pytest.mark.skipif(os.name == "nt", reason="skip non-Unix")],
+    ),
+    pytest.param(
+        {"XDG_RUNTIME_DIR": "/xdgrun"},
+        "/xdgrun/bt_u0",
+        id="XDG_RUNTIME_DIR",
+        marks=[pytest.mark.skipif(os.name == "nt", reason="skip non-Unix")],
+    ),
+    pytest.param(
+        {"SYSTEMROOT": "\\test"},
+        "\\test\\bt_testuser",
+        id="windows",
+        marks=[pytest.mark.skipif(os.name != "nt", reason="skip non-Windows")],
+    ),
+])
+def test_default_bearer_token_file(env, result):
+    """Test `default_bearer_token_file`."""
+    os.environ.update(env)
+    assert igwn_scitokens.default_bearer_token_file() == result
+
+
+@mock.patch("htgettoken.main")
+def test_get_token(htgettoken):
+    """Test `get_scitoken`."""
+    # get a new token
+    tokenfile = igwn_scitokens.get_scitoken(
+        minsecs=600,
+        quiet=False,
+    )
+
+    btf = igwn_scitokens.default_bearer_token_file()
+    assert tokenfile == btf
+    htgettoken.assert_called_once_with([
+        "--outfile", btf,
+        "--minsecs", "600",
+        "--nooidc",
+    ])
+
+
+def test_get_token_error_systemexit():
+    """Test that `get_scitoken` handles `SystemExit` well."""
+    with pytest.raises(
+        RuntimeError,
+        match="htgettoken failed",
+    ) as exc_info:
+        igwn_scitokens.get_scitoken(badkwarg=0)
+    assert "no such option: --badkwarg" in str(exc_info.getrepr(chain=True))

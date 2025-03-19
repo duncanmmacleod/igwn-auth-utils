@@ -23,6 +23,7 @@ from .requests import (
 )
 from .scitokens import (
     find_token as find_scitoken,
+    get_scitoken,
     token_authorization_header as scitoken_authorization_header,
 )
 from .x509 import (

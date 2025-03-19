@@ -34,6 +34,7 @@ SciTokens for use with HTTP(S) requests to IGWN-operated services.
 
 %package -n python3-%{srcname}
 Summary:  %{summary}
+Requires: htgettoken
 %description -n python3-%{srcname}
 Python library functions to simplify using IGWN authorisation credentials.
 This project is primarily aimed at discovering X.509 credentials and
@@ -66,6 +67,7 @@ python_requires = >=%{python3_version}
 install_requires =
   cryptography
   gssapi
+  htgettoken >= 2.1
   requests
   safe-netrc >= 1.0
   scitokens >= 1.8
