@@ -39,6 +39,7 @@ classifiers = [
 requires-python = ">=3.9"
 dependencies = [
   "cryptography >=44.0.1",
+  "gssapi >= 1.9.0",
   "requests >=2.32.0",
   "safe-netrc >=1.0",
   "scitokens >=1.8",

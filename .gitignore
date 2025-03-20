@@ -41,6 +41,7 @@ pip-delete-this-directory.txt
 /docs/_build
 /docs/api/*.rst
 !/docs/api/igwn_auth_utils.rst
+!/docs/api/igwn_auth_utils.kerberos.rst
 !/docs/api/igwn_auth_utils.requests.rst
 !/docs/api/igwn_auth_utils.scitokens.rst
 !/docs/api/igwn_auth_utils.x509.rst

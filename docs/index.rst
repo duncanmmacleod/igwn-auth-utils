@@ -47,6 +47,7 @@ Documentation
     :maxdepth: 1
     :caption: Credential utilities
 
+    Kerberos <kerberos>
     SciTokens <scitokens>
     X.509 <x509>
 

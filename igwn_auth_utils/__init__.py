@@ -12,6 +12,7 @@ __credits__ = "Duncan Brown, Leo Singer"
 __license__ = "BSD-3-Clause"
 
 from .error import IgwnAuthError
+from .kerberos import kinit
 from .requests import (
     get,
     request,
