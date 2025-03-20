@@ -65,6 +65,7 @@ packages = find:
 python_requires = >=%{python3_version}
 install_requires =
   cryptography
+  gssapi
   requests
   safe-netrc >= 1.0
   scitokens >= 1.8
