@@ -1,7 +1,7 @@
 [build-system]
 requires = [
-  "setuptools>=69.3.0",
-  "setuptools_scm[toml]>=3.4.3",
+  "setuptools >=70.0.0",
+  "setuptools_scm[toml] >=3.4.3",
   "wheel",
 ]
 build-backend = "setuptools.build_meta"
@@ -36,12 +36,12 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Astronomy",
   "Topic :: Scientific/Engineering :: Physics",
 ]
-requires-python = ">=3.6"
+requires-python = ">=3.9"
 dependencies = [
-  "cryptography >= 3.2",
-  "requests >= 2.20",
-  "safe-netrc >= 1.0",
-  "scitokens >= 1.8",
+  "cryptography >=44.0.1",
+  "requests >=2.32.0",
+  "safe-netrc >=1.0",
+  "scitokens >=1.8",
 ]
 dynamic = [
   "version",

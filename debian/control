@@ -8,13 +8,13 @@ Maintainer: Duncan Macleod <duncan.macleod@ligo.org>
 Section: python
 Priority: optional
 Standards-Version: 4.6.0
-X-Python3-Version: >= 3.6
+X-Python3-Version: >= 3.9
 Build-Depends:
  debhelper (>= 12),
  dh-python,
  pybuild-plugin-pyproject,
- python3-all (>= 3.6),
- python3-setuptools (>= 61.0.0),
+ python3-all,
+ python3-setuptools,
  python3-setuptools-scm,
  python3-wheel,
 
@@ -25,8 +25,8 @@ Architecture: all
 Depends:
  ${misc:Depends},
  ${python3:Depends},
- python3-cryptography (>= 3.2),
- python3-requests (>= 2.20),
+ python3-cryptography,
+ python3-requests,
  python3-safe-netrc (>= 1.0),
  python3-scitokens (>= 1.8),
 Description: Authorisation utilities for IGWN
