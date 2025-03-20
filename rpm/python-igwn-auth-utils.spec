@@ -62,10 +62,10 @@ license_files = LICENSE
 url = %{url}
 [options]
 packages = find:
-python_requires = >=3.6
+python_requires = >=%{python3_version}
 install_requires =
-  cryptography >= 3.2
-  requests >= 2.20
+  cryptography
+  requests
   safe-netrc >= 1.0
   scitokens >= 1.8
 SETUP_CFG
