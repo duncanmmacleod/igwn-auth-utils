@@ -116,6 +116,8 @@ filterwarnings = [
   "ignore:.*pkg_resources.*",
   # ignore use of imp in invoke (fixed in invoke-2.1.0)
   "ignore:the imp module::invoke",
+  # ignore ImportWarning from gssapi on EL8
+  "ignore:can't resolve package from __spec__",
 ]
 
 # -- ruff
