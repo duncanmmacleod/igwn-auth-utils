@@ -26,6 +26,12 @@ extensions = [
 ]
 default_role = "obj"
 
+references_file = "references.rst"
+excluded_patterns = [
+    references_file,
+]
+rst_epilog = f"\n.. include:: /{references_file}"
+
 # -- theme options ----------
 
 html_theme = "furo"

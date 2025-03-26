@@ -40,6 +40,7 @@ requires-python = ">=3.9"
 dependencies = [
   "cryptography >=44.0.1",
   "gssapi >= 1.9.0",
+  "htgettoken >= 2.1",
   "requests >=2.32.0",
   "safe-netrc >=1.0",
   "scitokens >=1.8",
@@ -113,6 +114,10 @@ filterwarnings = [
   "ignore:Using or importing the ABCs::pyreadline",
   # ignore pkg_resources deprecation
   "ignore:.*pkg_resources.*",
+  # ignore use of imp in invoke (fixed in invoke-2.1.0)
+  "ignore:the imp module::invoke",
+  # ignore ImportWarning from gssapi on EL8
+  "ignore:can't resolve package from __spec__",
 ]
 
 # -- ruff
