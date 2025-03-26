@@ -1,3 +1,13 @@
+igwn-auth-utils (1.3.0-1) unstable; urgency=low
+
+  * Update to 1.3.0
+  * Update X-Python3-Version
+  * Remove explicit Requires, rely on Python metadata
+  * Add py3dist-overrides
+  * Add requirement on htgettoken
+
+ -- Duncan Macleod <duncan.macleod@ligo.org>  Wed, 26 Mar 2025 11:21:00 +0000
+
 igwn-auth-utils (1.2.1-1) unstable; urgency=low
 
   * update to 1.2.1
