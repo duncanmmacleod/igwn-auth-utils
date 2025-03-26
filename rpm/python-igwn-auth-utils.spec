@@ -1,6 +1,6 @@
 %define srcname igwn-auth-utils
 %global distname %{lua:name = string.gsub(rpm.expand("%{srcname}"), "[.-]", "_"); print(name)}
-%define version 1.2.1
+%define version 1.3.0
 %define release 1
 
 Name:      python-%{srcname}
@@ -34,7 +34,6 @@ SciTokens for use with HTTP(S) requests to IGWN-operated services.
 
 %package -n python3-%{srcname}
 Summary:  %{summary}
-Requires: htgettoken
 %description -n python3-%{srcname}
 Python library functions to simplify using IGWN authorisation credentials.
 This project is primarily aimed at discovering X.509 credentials and
@@ -110,6 +109,11 @@ rm -rf $RPM_BUILD_ROOT
 # -- changelog
 
 %changelog
+* Wed Mar 26 2025 Duncan Macleod <duncan.macleod@ligo.org> - 1.3.0-1
+- Update to 1.3.0
+- Remove some version requirements for baseos/epel packages
+- Add requirement on python3dist(htgettoken)
+
 * Tue Mar 18 2025 Duncan Macleod <duncan.macleod@ligo.org> - 1.2.1-1
 - update to 1.2.1
 
