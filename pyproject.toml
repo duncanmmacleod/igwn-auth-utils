@@ -39,8 +39,6 @@ classifiers = [
 requires-python = ">=3.9"
 dependencies = [
   "cryptography >=44.0.1",
-  "gssapi >= 1.9.0",
-  "htgettoken >= 2.1",
   "requests >=2.32.0",
   "safe-netrc >=1.0",
   "scitokens >=1.8",
@@ -50,6 +48,17 @@ dynamic = [
 ]
 
 [project.optional-dependencies]
+# -- functional extras
+
+gettoken = [
+  "htgettoken >= 2.1",
+]
+kerberos = [
+  "gssapi >= 1.9.0",
+]
+
+# -- build/test
+
 docs = [
   "furo",
   "Sphinx >= 4.0.0",

@@ -34,6 +34,8 @@ SciTokens for use with HTTP(S) requests to IGWN-operated services.
 
 %package -n python3-%{srcname}
 Summary:  %{summary}
+Recommends: python3dist(gssapi)
+Recommends: python3dist(htgettoken)
 %description -n python3-%{srcname}
 Python library functions to simplify using IGWN authorisation credentials.
 This project is primarily aimed at discovering X.509 credentials and
@@ -65,11 +67,14 @@ packages = find:
 python_requires = >=%{python3_version}
 install_requires =
   cryptography
-  gssapi
-  htgettoken >= 2.1
   requests
   safe-netrc >= 1.0
   scitokens >= 1.8
+[options.extras_require]
+kerberos =
+  gssapi
+gettoken =
+  htgettoken >= 2.1
 SETUP_CFG
 %endif
 
