@@ -25,6 +25,9 @@ Architecture: all
 Depends:
  ${misc:Depends},
  ${python3:Depends},
+Recommends:
+ htgettoken,
+ python3-gssapi,
 Description: Authorisation utilities for IGWN
  Python library functions to simplify using IGWN authorisation credentials.
  This project is primarily aimed at discovering X.509 credentials and
