@@ -1,4 +1,4 @@
-# Copyright 2025 Cardiff University
+# Copyright (c) 2025 Cardiff University
 # SPDX-License-Identifier: BSD-3-Clause
 
 """Utility module to initialise Kerberos ticket-granting tickets.

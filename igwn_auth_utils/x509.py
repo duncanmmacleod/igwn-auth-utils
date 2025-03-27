@@ -1,4 +1,4 @@
-# Copyright 2021 Cardiff University
+# Copyright (c) 2021-2025 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
 """Utilities for discovering and handling X.509 credentials."""

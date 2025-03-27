@@ -4,7 +4,7 @@ Upstream-Contact: Duncan Macleod <duncan.macleod@ligo.org>
 Source: https://git.ligo.org/duncanmmacleod/igwn-auth-utils
 
 Files: *
-Copyright: 2021 Cardiff University
+Copyright: 2021-2025 Cardiff University
 License: BSD-3-clause
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are
