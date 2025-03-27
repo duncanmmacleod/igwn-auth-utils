@@ -1,4 +1,4 @@
-# Copyright 2021-2023 Cardiff University
+# Copyright (c) 2021-2025 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
 """Python Requests interface with IGWN authentication.

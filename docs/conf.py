@@ -1,4 +1,4 @@
-# Copyright 2021-2024 Cardiff University
+# Copyright (c) 2021-2025 Cardiff University
 # Distributed under the terms of the BSD-3-Clause license
 
 import igwn_auth_utils
@@ -7,7 +7,7 @@ import sphinx_github_style
 # -- metadata ---------------
 
 project = "igwn-auth-utils"
-copyright = "2021-2024 Cardiff University"
+copyright = "2021-2025 Cardiff University"
 author = "Duncan Macleod"
 top_module = igwn_auth_utils
 release = top_module.__version__

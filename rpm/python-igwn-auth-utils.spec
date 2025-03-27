@@ -1,6 +1,6 @@
 %define srcname igwn-auth-utils
 %global distname %{lua:name = string.gsub(rpm.expand("%{srcname}"), "[.-]", "_"); print(name)}
-%define version 1.3.0
+%define version 1.3.1
 %define release 1
 
 Name:      python-%{srcname}
@@ -114,6 +114,10 @@ rm -rf $RPM_BUILD_ROOT
 # -- changelog
 
 %changelog
+* Wed Mar 26 2025 Duncan Macleod <duncan.macleod@ligo.org> - 1.3.1-1
+- Update to 1.3.1
+- Move python3-gssapi and python3-htgettoken from Requires to Recommends
+
 * Wed Mar 26 2025 Duncan Macleod <duncan.macleod@ligo.org> - 1.3.0-1
 - Update to 1.3.0
 - Remove some version requirements for baseos/epel packages
