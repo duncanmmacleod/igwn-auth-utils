@@ -28,3 +28,10 @@ API
    ~igwn_auth_utils.find_scitoken
    ~igwn_auth_utils.get_scitoken
    ~igwn_auth_utils.scitoken_authorization_header
+
+==================================
+Enable/disable automatic discovery
+==================================
+
+Automatic discovery of SciTokens when making requests can be enabled or
+disabled from the environment, see :ref:`igwn-auth-utils-find-scitoken`.

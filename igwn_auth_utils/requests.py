@@ -10,6 +10,7 @@ This is heavily inspired by Leo Singer's excellent
 __author__ = "Duncan Macleod <duncan.macleod@ligo.org>"
 __credits__ = "Leo Singer <leo.singer@ligo.org>"
 
+import os
 import sys
 from functools import wraps
 from textwrap import indent
@@ -33,6 +34,15 @@ from .x509 import (
 
 
 # -- Auth utilities -------------------
+
+def _bool_env(varname, default=None):
+    """Parse an environment variable as a boolean."""
+    try:
+        value = os.environ[varname]
+    except KeyError:
+        return default
+    return value.lower() in {"1", "y", "yes", "true"}
+
 
 def _find_cred(func, *args, error=True, **kwargs):
     """Find a credential and maybe ignore an `~igwn_auth_utils.IgwnAuthError`.
@@ -176,6 +186,12 @@ def _prepare_auth(
         )
     if force_noauth:
         return None, False
+
+    # parse environment settings
+    if cert is None:
+        cert = _bool_env("IGWN_AUTH_UTILS_FIND_X509")
+    if token is None:
+        token = _bool_env("IGWN_AUTH_UTILS_FIND_SCITOKEN")
 
     # cert auth (always attach if we can)
     if cert in (None, True):  # not disabled and not given explicitly
