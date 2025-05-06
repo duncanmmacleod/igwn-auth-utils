@@ -64,3 +64,81 @@ HTTP methods are supported via functions in the
    igwn_auth_utils.requests.patch
    igwn_auth_utils.requests.post
    igwn_auth_utils.requests.put
+
+==========================
+Authentication credentials
+==========================
+
+By default, ``igwn_auth_utils`` will attempt to find both a
+:doc:`SciToken <scitokens>` and an :doc:`X.509 credential <x509>`,
+to attach to a request.
+If a credential or token is found it will be attached, if one isn't found,
+no failures or warnings are emitted.
+Requests will then be accepted or rejected by the remote application as
+appropriate.
+
+``igwn_auth_utils`` supports two environment variables to explicitly enable
+(require) or disable automatic discovery of credentials.
+
+.. list-table:: Environment variable values
+    :stub-columns: 1
+
+    * - Enable
+      - ``y``, ``yes``, ``true``, ``1``
+    * - Disable
+      - ``n``, ``no``, ``false``, ``0``
+
+If a variable is set to something 'truthy' (``yes``), and a credential of that
+type is not found, an error will be raised before the request is sent.
+If a variable is set to something 'falsy' (``no``) no attempt will be made
+to discover a credential of that type, and no warnings will be emitted.
+
+.. _igwn-auth-utils-find-scitoken:
+
+---------------------------------
+``IGWN_AUTH_UTILS_FIND_SCITOKEN``
+---------------------------------
+
+Set the ``IGWN_AUTH_UTILS_FIND_SCITOKEN`` variable to control automatic
+discovery of :doc:`SciTokens <scitokens>`.
+
+.. tab-set::
+
+    .. tab-item:: Enable
+
+        .. code-block:: bash
+            :caption: Require finding a scitoken (``bash``)
+
+            IGWN_AUTH_UTILS_FIND_SCITOKEN=yes
+
+    .. tab-item:: Disable
+
+        .. code-block:: bash
+            :caption: Disable finding a scitoken (``bash``)
+
+            IGWN_AUTH_UTILS_FIND_SCITOKEN=no
+
+.. _igwn-auth-utils-find-x509:
+
+-----------------------------
+``IGWN_AUTH_UTILS_FIND_X509``
+-----------------------------
+
+Set the ``IGWN_AUTH_UTILS_FIND_X509`` variable to control automatic
+discovery of :doc:`X.509 certificates <x509>`.
+
+.. tab-set::
+
+    .. tab-item:: Enable
+
+        .. code-block:: bash
+            :caption: Require finding an X.509 credential (``bash``)
+
+            IGWN_AUTH_UTILS_FIND_X509=yes
+
+    .. tab-item:: Disable
+
+        .. code-block:: bash
+            :caption: Disable finding an X.509 credential (``bash``)
+
+            IGWN_AUTH_UTILS_FIND_X509=no

@@ -64,6 +64,7 @@ docs = [
   "Sphinx >= 4.0.0",
   "sphinx-automodapi",
   "sphinx-copybutton",
+  "sphinx-design >=0.6.1",
   "sphinx-github-style",
 ]
 test = [

@@ -23,6 +23,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx_automodapi.automodapi",
     "sphinx_copybutton",
+    "sphinx_design",
 ]
 default_role = "obj"
 

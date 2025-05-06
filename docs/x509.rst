@@ -15,3 +15,10 @@ API
    :nosignatures:
 
    ~igwn_auth_utils.find_x509_credentials
+
+==================================
+Enable/disable automatic discovery
+==================================
+
+Automatic discovery of X.509 credentials when making requests can be enabled
+or disabled from the environment, see :ref:`igwn-auth-utils-find-x509`.
