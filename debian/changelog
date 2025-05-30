@@ -1,3 +1,10 @@
+igwn-auth-utils (1.4.0-1) unstable; urgency=low
+
+  * Update to 1.4.0
+  * Copyright updated to include 2025
+
+ -- Duncan Macleod <duncan.macleod@ligo.org>  Fri, 30 May 2025 15:25:00 +0100
+
 igwn-auth-utils (1.3.1-1) unstable; urgency=low
 
   * Update to 1.3.1
