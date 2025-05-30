@@ -71,7 +71,7 @@ def is_valid_token(
     audience,
     scope,
     issuer=None,
-    timeleft=600,
+    timeleft=60,
     warn=False,
 ):
     """Test whether a ``token`` is valid according to the given claims.
@@ -303,7 +303,7 @@ def find_token(
     audience,
     scope,
     issuer=None,
-    timeleft=600,
+    timeleft=60,
     skip_errors=True,
     warn=False,
     **kwargs,
