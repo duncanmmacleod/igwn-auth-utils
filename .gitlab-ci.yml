@@ -1,8 +1,19 @@
+workflow:
+  rules:
+    # run for merge requests
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    # don't run on branches if there's an open merge request
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    # run on branches and tags
+    - if: $CI_COMMIT_BRANCH || $CI_COMMIT_TAG
+
 include:
   # -- Python ------------------------
 
   - component: $CI_SERVER_FQDN/computing/gitlab/components/python/all@2
     inputs:
+      merge_request_pipelines: true
       install_extra: "gettoken,kerberos,test"
       code_quality_analyzer: "ruff"
       run_advanced_sast: true
@@ -18,6 +29,7 @@ include:
 
   - component: $CI_SERVER_FQDN/computing/gitlab/components/debian/all@2
     inputs:
+      merge_request_pipelines: true
       needs: [sdist]
       debian_versions:
         - bullseye
@@ -42,6 +54,7 @@ include:
 
   - component: $CI_SERVER_FQDN/computing/gitlab/components/redhat/all@2
     inputs:
+      merge_request_pipelines: true
       # https://git.ligo.org/computing/helpdesk/-/issues/7162
       disable_repos: "igwn-backports*"
       needs: [sdist]
