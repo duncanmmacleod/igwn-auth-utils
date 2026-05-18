@@ -1,7 +1,7 @@
 [build-system]
 requires = [
   "setuptools >=70.0.0",
-  "setuptools_scm[toml] >=3.4.3",
+  "setuptools_scm[toml] >=3.4.3,<9",
   "wheel",
 ]
 build-backend = "setuptools.build_meta"
@@ -24,11 +24,6 @@ classifiers = [
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.6",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -36,10 +31,10 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Astronomy",
   "Topic :: Scientific/Engineering :: Physics",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
   "cryptography >=44.0.1",
-  "requests >=2.32.0",
+  "requests >=2.32.0,<2.34.0",
   "safe-netrc >=1.0",
   "scitokens >=1.8",
 ]
@@ -48,8 +43,6 @@ dynamic = [
 ]
 
 [project.optional-dependencies]
-# -- functional extras
-
 gettoken = [
   "htgettoken >= 2.1",
 ]
@@ -57,8 +50,18 @@ kerberos = [
   "gssapi >= 1.9.0",
 ]
 
-# -- build/test
+[project.urls]
+"Homepage" = "https://git.ligo.org/computing/igwn-auth-utils/"
+"Bug Tracker" = "https://git.ligo.org/computing/igwn-auth-utils/-/issues/"
+"Documentation" = "https://igwn-auth-utils.readthedocs.io"
+"Source Code" = "https://git.ligo.org/computing/igwn-auth-utils.git"
 
+[dependency-groups]
+dev = [
+  { "include-group" = "docs" },
+  { "include-group" = "qa" },
+  { "include-group" = "test" },
+]
 docs = [
   "furo",
   "Sphinx >= 4.0.0",
@@ -67,17 +70,15 @@ docs = [
   "sphinx-design >=0.6.1",
   "sphinx-github-style",
 ]
+qa = [
+  "ruff",
+  "ty",
+]
 test = [
   "pytest >= 3.9.1",
   "pytest-cov",
   "requests-mock",
 ]
-
-[project.urls]
-"Homepage" = "https://git.ligo.org/computing/igwn-auth-utils/"
-"Bug Tracker" = "https://git.ligo.org/computing/igwn-auth-utils/-/issues/"
-"Documentation" = "https://igwn-auth-utils.readthedocs.io"
-"Source Code" = "https://git.ligo.org/computing/igwn-auth-utils.git"
 
 # -- tools ------------------
 

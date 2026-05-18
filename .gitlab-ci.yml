@@ -11,19 +11,23 @@ workflow:
 include:
   # -- Python ------------------------
 
-  - component: $CI_SERVER_FQDN/computing/gitlab/components/python/all@2
+  - component: $CI_SERVER_FQDN/computing/gitlab/components/python/all@4
     inputs:
       merge_request_pipelines: true
-      install_extra: "gettoken,kerberos,test"
+      uv: true
       code_quality_analyzer: "ruff"
-      run_advanced_sast: true
       python_versions:
-        - "3.9"
-        - "3.10"
         - "3.11"
         - "3.12"
         - "3.13"
-  - component: $CI_SERVER_FQDN/computing/gitlab/components/python/type-checking@2
+        - "3.14"
+      pip_install_options: &uv_options >-
+        -r pyproject.toml
+        --all-extras
+        --group dev
+  - component: $CI_SERVER_FQDN/computing/gitlab/components/python/ty@4
+    inputs:
+      uv_options: *uv_options
 
   # -- Debian packaging --------------
 
@@ -32,7 +36,6 @@ include:
       merge_request_pipelines: true
       needs: [sdist]
       debian_versions:
-        - bullseye
         - bookworm
       test_install: &system_test_install >-
         python3-igwn-auth-utils
@@ -55,8 +58,6 @@ include:
   - component: $CI_SERVER_FQDN/computing/gitlab/components/redhat/all@2
     inputs:
       merge_request_pipelines: true
-      # https://git.ligo.org/computing/helpdesk/-/issues/7162
-      disable_repos: "igwn-backports*"
       needs: [sdist]
       redhat_versions:
         - 8
@@ -66,22 +67,13 @@ include:
 
   # -- Documentation -----------------
 
-  - component: $CI_SERVER_FQDN/computing/gitlab/components/sphinx/build@~latest
+  - component: $CI_SERVER_FQDN/computing/gitlab/components/sphinx/build@1
     inputs:
-      requirements: ".[docs]"
+      requirements: ". --group docs"
+      apt_packages: >-
+        graphviz
 
 # -- customisations ------------------
-
-dependency_scanning:
-  stage: test
-  variables:
-    DEBIAN_FRONTEND: "noninteractive"
-  before_script:
-    # install some underlying utilities using `apt` so that the dependency
-    # scanner can use pip to install everything else
-    - apt-get update -yqq
-    - apt-get install -yqq
-        libkrb5-dev
 
 redhat_test_el8:
   before_script:
@@ -93,10 +85,3 @@ redhat_test_el8:
         "coverage[toml]==5.3"
         "pytest==6.0.0"
         "pytest-cov==2.10.1"
-
-sphinx:
-  before_script:
-    # install graphviz to get inheritance graphs
-    - apt-get -yqq update && apt-get -yqq install
-        graphviz
-    - !reference [.sphinx, before_script]
